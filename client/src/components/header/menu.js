@@ -1,13 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React from 'react'
+import { Link } from "react-router-dom";
 
 function Menu() {
     return (
         <div className="menu">
             <ul>
+            <Link to={window.PATH + "/"}>
                 <li className="active">
                     <i className="bi bi-house"></i>
                     <div>HOME</div>
                 </li>
+                </Link>
                 <li>
                     <i className="bi bi-gem"></i>
                     <div>TOP</div>

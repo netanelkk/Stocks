@@ -48,10 +48,18 @@ export async function fetchBySymbol(symbol) {
   return await request(API_URL + "/stock/"+symbol, "", "GET");
 }
 
+export async function fetchGraph(stockid, range) {
+  return await request(API_URL + "/stock/"+stockid+"/graph/"+range, "", "GET");
+}
+
 export async function fetchSuggestions(ignoresymbol) {
   return await request(API_URL + "/stock/suggestions/"+ignoresymbol, "", "GET");
 }
 
 export async function fetchArticles() {
   return await request(API_URL + "/main/articles", "", "GET");
+}
+
+export async function fetchAll() {
+  return await request(API_URL + "/main/stocks", "", "GET");
 }

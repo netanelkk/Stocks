@@ -9,14 +9,16 @@ const xoffset = {
     right: 10
 }
 
-export function graph(c, data, dates, full = true) {
+var ctx, dots = [];
+export function graph(c, data, pred, dates) {
     // find max numberic value in data
-    var max = Math.ceil(Math.max(...data) / 50) * 50;
+    var max = Math.ceil(Math.max(...data,...pred) / 50) * 50;
     max = (max === 0) ? 50 : max;
 
     dimenstion.width = document.getElementById("graph").offsetWidth;
-    var ctx = c.getContext("2d");
+    ctx = c.getContext("2d");
     ctx.canvas.width = dimenstion.width;
+    dots = [];
 
     // outer frame
     ctx.beginPath();
@@ -59,43 +61,43 @@ export function graph(c, data, dates, full = true) {
     }
     ctx.stroke();
 
-    if (full) {
-        var linegrad = ctx.createLinearGradient(baroffset, Y(data[0], max), graphwidth, dimenstion.graphHeight);
-        linegrad.addColorStop(0, "#53c4ee");
-        linegrad.addColorStop(1, "#8bd6f2");
+    drawLine(baroffset,data,max,graphwidth,barwidth);
+    drawLine(baroffset,pred,max,graphwidth,barwidth,true);
 
-        // graph line
-        ctx.beginPath();
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = linegrad;
-        let dots = [{ x: baroffset, y: Y(data[0], max) }];
-        ctx.moveTo(dots[0].x, dots[0].y);
-        for (let i = 0; i < data.length; i++) {
-            const xposition = barwidth * i + baroffset;
-            dots[i] = { x: xposition, y: Y(data[i], max), val: data[i] }
-            ctx.lineTo(dots[i].x, dots[i].y);
-        }
-        ctx.stroke();
-        ctx.lineTo(dots[data.length - 1].x, dimenstion.graphHeight);
-        ctx.lineTo(baroffset, dimenstion.graphHeight);
-        ctx.closePath();
+    return dots;
+}
 
-        // gradient shadow
-        var x1 = barwidth/2 + xoffset.left, y1 = 0;
-        var x2 = x1, y2 = dimenstion.graphHeight;
-        var fillgrad = ctx.createLinearGradient(x1, y1, x2, y2);
+function drawLine(baroffset,data,max,graphwidth,barwidth,ispred=false) {
+    var linegrad = ctx.createLinearGradient(baroffset, Y(data[0], max), graphwidth, dimenstion.graphHeight);
+    linegrad.addColorStop(0, (ispred ? "#fff6d3" : "#53c4ee"));
+    linegrad.addColorStop(1, (ispred ? "#ffeca4" : "#8bd6f2"));
 
-        fillgrad.addColorStop(0, "#8bd6f257");
-        fillgrad.addColorStop(1, "#ffffff00");
-        ctx.fillStyle = fillgrad;
-        ctx.fill();
-
-
-        return dots;
+    // graph line
+    ctx.beginPath();
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = linegrad;
+    ctx.moveTo(baroffset, Y(data[0], max));
+    for (let i = 0; i < data.length; i++) {
+        const xposition = barwidth * i + baroffset;
+        dots.push({ x: xposition, y: Y(data[i], max), val: data[i] });
+        ctx.lineTo(dots[dots.length-1].x, dots[dots.length-1].y);
     }
+    ctx.stroke();
+    ctx.lineTo(dots[dots.length-1].x, dimenstion.graphHeight);
+    ctx.lineTo(baroffset, dimenstion.graphHeight);
+    ctx.closePath();
 
+    // gradient shadow
+    var x1 = barwidth/2 + xoffset.left, y1 = 0;
+    var x2 = x1, y2 = dimenstion.graphHeight;
+    var fillgrad = ctx.createLinearGradient(x1, y1, x2, y2);
+
+    fillgrad.addColorStop(0, (ispred ? "#f2e78b57" : "#8bd6f257"));
+    fillgrad.addColorStop(1, "#ffffff00");
+    ctx.fillStyle = fillgrad;
+    ctx.fill();
 }
 
 function Y(val, max) {

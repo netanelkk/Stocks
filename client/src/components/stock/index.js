@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams } from "react-router-dom";
-import { fetchBySymbol, fetchSuggestions } from '../../api';
+import { fetchBySymbol, fetchSuggestions, fetchGraph } from '../../api';
 import { graph } from './graph';
 import ReactTooltip from 'react-tooltip';
 import { StockWidget } from '../stock/widget';
@@ -10,37 +10,31 @@ function round3digits(x) {
     return Math.round(x * 1000) / 1000;
 }
 
-const StockElements = ({ data }) => {
+const Graph = ({stockid}) => {
     const graphRef = useRef(null);
     const [dots, setDots] = useState(null);
     const [graphDots, setGraphDots] = useState(null);
-    const [stockDifference, setStockDifference] = useState(0);
-    const [stockDifferencePercentage, setStockDifferencePercentage] = useState(0);
-
-    const calculateDiff = (result) => {
-        let stockdata = result.stockdata[0];
-        const stockdiff = result.preprice != 0 ? round3digits(stockdata.close - result.preprice) : 0;
-        const stockdiffper = (result.preprice != 0 ? round3digits(stockdiff / result.preprice * 100) : 0);
-        setStockDifference(stockdiff);
-        setStockDifferencePercentage(stockdiffper);
-    }
+    const [range, setRange] = useState(30);
 
 
     useEffect(() => {
-        calculateDiff(data);
-        let graphdata = { data: [], dates: [] };
-        initGraphData(data.stockdata, graphdata);
-        setGraphDots(graph(graphRef.current, graphdata.data, graphdata.dates));
-    }, []);
-
+        (async () => {
+            const d = await fetchGraph(stockid, range);
+            if (!d.pass) throw new Error(d.msg);
+            let graphdata = { data: [], pred: [], dates: [] };
+            initGraphData(d.data, graphdata);
+            setGraphDots(graph(graphRef.current, graphdata.data, graphdata.pred, graphdata.dates));
+        })();
+    }, [range]);
 
     useEffect(() => {
         if (dots && graphDots) {
             if (graphDots.length > 1) {
-
+                cleanDots();
                 for (let i = 1; i <= graphDots.length; i++) {
                     document.getElementById("point" + i).style.left = (graphDots[i - 1].x - 20) + "px";
                     document.getElementById("point" + i).style.top = (graphDots[i - 1].y) + "px";
+                    document.getElementById("point" + i).style.display = "block";
                     document.getElementById("point" + i).setAttribute("data-tip", graphDots[i - 1].val + " $");
                 }
                 ReactTooltip.rebuild();
@@ -48,19 +42,79 @@ const StockElements = ({ data }) => {
         }
     }, [dots, graphDots]);
 
+    const cleanDots = () => {
+        const points = document.getElementsByClassName("point-space");
+        for(let i = 0; i < points.length; i++) {
+            points[i].style.display = "none";
+        }
+    }
 
     const initGraphData = (stockdata, graphdata) => {
         let dotselements = [];
         for (let i = stockdata.length - 1; i >= 0; i--) {
-            graphdata.data.push(stockdata[i].close);
+            if (stockdata[i].close) {
+                graphdata.data.push(stockdata[i].close);
+            }
+
+            graphdata.pred.push(stockdata[i].predclose);
+
             let onlydate = /\d{4}-\d{2}-\d{2}/.exec(stockdata[i].date);
             graphdata.dates.push(onlydate);
+
             dotselements.push(<div className='point-space' id={"point" + (i + 1)} key={"point" + (i + 1)}>
+                <div className='point'></div>
+            </div>);
+            dotselements.push(<div className='point-space' id={"point" + (stockdata.length + i + 1)} key={"point" + (stockdata.length + i + 1)}>
                 <div className='point'></div>
             </div>);
         }
         setDots(dotselements);
     };
+
+    return (
+        <>
+            <div className="graph-menu">
+                <div className="graph-hint">
+                    <div className="hint">
+                        <div id="actual-line"></div>
+                        <span>ACTUAL</span>
+                    </div>
+                    <div className="hint">
+                        <div id="predicted-line"></div>
+                        <span>PREDICTED</span>
+                    </div>
+                </div>
+                <ul>
+                    <li className={(range===7) ? "active" : ""} onClick={() => { setRange(7) }}>1 week</li>
+                    <li className={(range===30) ? "active" : ""} onClick={() => { setRange(30) }}>1 month</li>
+                    <li className={(range===365) ? "active" : ""} onClick={() => { setRange(365) }}>1 year</li>
+                </ul>
+            </div>
+
+            <div id="graph">
+            <div className="graph-dots">
+                {dots}
+            </div>
+            <canvas width="0" height="300" ref={graphRef}></canvas>
+            </div>
+        </>
+    )
+}
+
+const StockElements = ({ data }) => {
+    const [stockDifference, setStockDifference] = useState(0);
+    const [stockDifferencePercentage, setStockDifferencePercentage] = useState(0);
+
+    const calculateDiff = () => {
+        const stockdiff = data.preprice != 0 ? round3digits(data.close - data.preprice) : 0;
+        const stockdiffper = (data.preprice != 0 ? round3digits(stockdiff / data.preprice * 100) : 0);
+        setStockDifference(stockdiff);
+        setStockDifferencePercentage(stockdiffper);
+    }
+
+    useEffect(() => {
+        calculateDiff();
+    }, []);
 
     return (
         <>
@@ -72,7 +126,7 @@ const StockElements = ({ data }) => {
                 </div>
                 <h1>{data.name + " (" + data.symbol + ")"}</h1>
                 <div>
-                    <span className="stock-price">{"$" + data.stockdata[0].close}</span>
+                    <span className="stock-price">{"$" + data.close}</span>
                     <div className={"stock-info " + ((stockDifference < 0) ? "negative" : "positive")}>
                         <span>{stockDifference}</span>
                         <span>{isNaN(stockDifferencePercentage) ? 0 : stockDifferencePercentage + "%"}</span>
@@ -80,20 +134,9 @@ const StockElements = ({ data }) => {
                 </div>
             </div>
 
-            <div className="graph-menu">
-                <ul>
-                    <li className="active">1 week</li>
-                    <li>1 month</li>
-                    <li>1 year</li>
-                </ul>
-            </div>
 
-            <div id="graph">
-                <div>
-                    {dots}
-                </div>
-                <canvas width="0" height="300" ref={graphRef}></canvas>
-            </div>
+            <Graph stockid={data.id} />
+
 
             <div className="row" id="detailsrow">
                 <div className="col-lg-6">
@@ -112,17 +155,17 @@ const StockElements = ({ data }) => {
                             <tbody>
                                 <tr>
                                     <td>Actual</td>
-                                    <td>${data.stockdata[0].open}</td>
-                                    <td>${data.stockdata[0].high}</td>
-                                    <td>${data.stockdata[0].low}</td>
-                                    <td>${data.stockdata[0].close}</td>
+                                    <td>${data.open}</td>
+                                    <td>${data.high}</td>
+                                    <td>${data.low}</td>
+                                    <td>${data.close}</td>
                                 </tr>
                                 <tr>
                                     <td>Predicated</td>
-                                    <td>${data.stockdata[0].predopen}</td>
-                                    <td>${data.stockdata[0].predhigh}</td>
-                                    <td>${data.stockdata[0].predlow}</td>
-                                    <td>${data.stockdata[0].predclose}</td>
+                                    <td>${data.predopen}</td>
+                                    <td>${data.predhigh}</td>
+                                    <td>${data.predlow}</td>
+                                    <td>${data.predclose}</td>
                                 </tr>
                             </tbody>
                         </table>

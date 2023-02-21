@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, {  useRef } from 'react'
 import Homepage from './components/homepage';
+import Stocks from './components/homepage/stocks';
 import Stock from './components/stock';
 import Header from './components/header';
 import Menu from './components/header/menu';
@@ -27,6 +28,7 @@ const Pages = React.memo(() => {
       <div className={"page" + (showmenu ? " withmenu" : "")}>
         <Routes>
           <Route path={window.PATH + "/"} element={<Homepage />} />
+          <Route path={window.PATH + "/stocks"} element={<Stocks />} />
           <Route path={window.PATH + "/stock"} element={<Stock topRef={topRef} />}>
             <Route path=":symbol" />
           </Route>
