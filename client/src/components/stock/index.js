@@ -57,9 +57,7 @@ const Graph = ({stockid}) => {
             }
 
             graphdata.pred.push(stockdata[i].predclose);
-
-            let onlydate = /\d{4}-\d{2}-\d{2}/.exec(stockdata[i].date);
-            graphdata.dates.push(onlydate);
+            graphdata.dates.push(stockdata[i].date);
 
             dotselements.push(<div className='point-space' id={"point" + (i + 1)} key={"point" + (i + 1)}>
                 <div className='point'></div>

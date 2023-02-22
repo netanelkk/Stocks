@@ -2,6 +2,15 @@ var express = require('express');
 var router = express.Router();
 const db = require('../models/database');
 
+router.get('/suggestion/:query', function (req, res, next) {
+  const { query } = req.params;
+  db.Stock.searchSuggestion(query).then((rows) => {
+    res.json({ data: rows });
+  }).catch(e => {
+    return res.status(400).json({ msg: "" });
+  });
+});
+
 
 router.get('/suggestions/:ignoresymbol', function (req, res, next) {
   const { ignoresymbol } = req.params;
@@ -30,6 +39,7 @@ router.get('/:stockid/graph/:range', function (req, res, next) {
   db.Stock.stockData(stockid, range).then(stockdata => {
     res.json({ data: stockdata });
   }).catch(e => {
+    console.log(e);
     return res.status(400).json({ msg: "" });
   });
 

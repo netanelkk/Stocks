@@ -60,6 +60,11 @@ export async function fetchArticles() {
   return await request(API_URL + "/main/articles", "", "GET");
 }
 
-export async function fetchAll() {
-  return await request(API_URL + "/main/stocks", "", "GET");
+export async function fetchAll(query) {
+  return await request(API_URL + "/main/stocks/"+query, "", "GET");
 }
+
+export async function suggestion(query) {
+  return await request(API_URL + "/stock/suggestion/"+query, "", "GET");
+}
+

@@ -70,11 +70,14 @@ body {
     background: #1b2037;
     border-radius: 7px;
     box-shadow: 0 2px 2px #0d0f1a;
-    transition: background-color 0.1s linear;
+
 }
 
-.search input[type=text]:focus {
-    background: #363e5e;
+.search input[type=text]:focus,
+.searchinput.active {
+    background: #363e5ecf !important;
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
 }
 
 .search input[type=text]::placeholder {
@@ -189,6 +192,21 @@ body {
     width: 100%;
 }
 
+.suggestion-row {
+    display: flex;
+    padding: 15px 20px;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s linear;
+}
+
+.suggestion-row:hover, .suggestion-row.active {
+    background: #424a686e;
+    border-left: 3px solid #495273;
+}
+
 .article {
     background: #1b1e31;
 }
@@ -301,6 +319,19 @@ body {
     user-select: none;
 }
 
+.suggestion-row img {
+    width: 32px;
+}
+
+.suggestion-row h2 {
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.suggestion-row .stock-price {
+    font-size: 15pt;
+}
+
 .stock-price {
     color: #19e7fe;
     font-size: 20pt;
@@ -331,8 +362,8 @@ body {
     margin: 25px 0;
 }
 
-.expand-button, .expand-button:hover {
-    background: #101322;
+.expand-button{
+    background: #10132282;
     border: none;
     outline: none;
     color: white;
@@ -341,6 +372,17 @@ body {
     margin: auto;
     display: inline-block;
     text-decoration: none;
+    transition: background 0.1s linear;
+}
+
+.expand-button:hover {
+    background: #101322;
+    text-decoration: none;
+    color: white;
+}
+
+.expand-button:active {
+    background: #0e1120;
 }
 
 .button-row {
@@ -351,7 +393,6 @@ body {
     background: #232740;
     width: 100%;
     min-height: 300px;
-
     padding: 15px 0 5px;
     position: relative;
 }
@@ -493,8 +534,9 @@ body {
     margin: 10px 0;
 }
 
-.stock-widget a, .header a {
-    color:white;
+.stock-widget a,
+.header a {
+    color: white;
     text-decoration: none;
 }
 
@@ -537,7 +579,8 @@ body {
     margin-right: 10px;
 }
 
-#actual-line, #predicted-line {
+#actual-line,
+#predicted-line {
     width: 30px;
     height: 2px;
     margin: 0 5px;
@@ -550,3 +593,57 @@ body {
 #actual-line {
     background: #53c4ee;
 }
+
+.search-suggestion {
+    position: absolute;
+    background: #363e5ecf;
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    width: 100%;
+    top: 45px;
+    border-radius: 0 0 7px 7px;
+    box-shadow: 5px 60px 50px #1c1f33;
+    z-index: 100;
+    overflow: hidden;
+}
+
+.search-container {
+    position: relative;
+    display: flex;
+    flex: 1;
+}
+
+.suggestions-showmore {
+    color: white;
+    cursor: pointer;
+    padding: 10px;
+    text-align: center;
+    transition: background 0.1s linear;
+}
+
+.suggestions-showmore.active, .suggestions-showmore:hover {
+    background: #424a686e;
+}
+
+#sug-loading {    
+    height: 3px;
+    background: linear-gradient(90deg,#333b59,#5d678a);
+    padding: 0;
+    width: 50%;
+    animation: spin-loading 0.8s ease infinite;
+  }
+
+  @keyframes spin-loading {
+    from {
+      margin-left: -50%;
+    }
+
+    to {
+      margin-left: 100%;
+    }
+  }
+
+  #search-form {
+    width: 100%;
+    display: flex;
+  }

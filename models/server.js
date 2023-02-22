@@ -24,11 +24,11 @@ class Server {
     this.app.use(bodyParser.urlencoded({ extended: true }));
 
     // delay for testing - TODO: Remove it
-    /*
+/*
     this.app.use(function(req,res,next){
-      setTimeout(next, 500);
+      setTimeout(next, 1000);
     });
-    */
+*/
   }
 
   // Bind controllers to routes

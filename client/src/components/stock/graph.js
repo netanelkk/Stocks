@@ -11,8 +11,14 @@ const xoffset = {
 
 var ctx, dots = [];
 export function graph(c, data, pred, dates) {
+
+    let maxdata = data;
+    if(data.length==0) {
+        maxdata = [0];
+    }
+
     // find max numberic value in data
-    var max = Math.ceil(Math.max(...data,...pred) / 50) * 50;
+    var max = Math.ceil(Math.max(...maxdata,...pred) / 50) * 50;
     max = (max === 0) ? 50 : max;
 
     dimenstion.width = document.getElementById("graph").offsetWidth;
@@ -51,19 +57,17 @@ export function graph(c, data, pred, dates) {
     const graphwidth = dimenstion.width - xoffset.left - xoffset.right;
     const barwidth = graphwidth / dates.length;
     const baroffset = barwidth / 2 + xoffset.left / 2;
-    let date = new Date();
-    date.setMonth(date.getMonth() - 5);
     for (let i = 0; i < dates.length; i++) {
         const xval = dates[i];
         const xposition = barwidth * i + baroffset - ctx.measureText(xval).width / 2;
         ctx.fillText(xval, xposition, dimenstion.height - 5);
-        date.setMonth(date.getMonth() + 1);
     }
     ctx.stroke();
 
-    drawLine(baroffset,data,max,graphwidth,barwidth);
-    drawLine(baroffset,pred,max,graphwidth,barwidth,true);
-
+    if(data.length>0) {
+        drawLine(baroffset,data,max,graphwidth,barwidth);
+        drawLine(baroffset,pred,max,graphwidth,barwidth,true);
+    }
     return dots;
 }
 
@@ -101,6 +105,6 @@ function drawLine(baroffset,data,max,graphwidth,barwidth,ispred=false) {
 }
 
 function Y(val, max) {
-    return dimenstion.graphHeight - (val / max) * dimenstion.graphHeight;
+    return dimenstion.graphHeight - (val / (max===0?1:max)) * dimenstion.graphHeight;
 }
 

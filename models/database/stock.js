@@ -2,15 +2,16 @@ const sql = require("..");
 
 const Stock = {};
 
-Stock.fetch = (limit=8) => {
+Stock.fetch = (query=null,limit=8) => {
   return new Promise((resolve, reject) => {
     sql.query(`SELECT *,
                  COALESCE((SELECT close FROM stock_data WHERE stockid = S.id ORDER BY date DESC LIMIT 1,1),0) as preprice,
                  COALESCE((SELECT close FROM stock_data WHERE stockid = S.id ORDER BY date DESC LIMIT 1),0) as price
-              FROM stock S
-              ORDER BY id LIMIT ?`,[limit], (err, res) => {
+              FROM stock S ` +
+              ((query) ? ` WHERE S.name LIKE ? OR S.symbol LIKE ? OR S.about LIKE ? ` : ``)
+             + ` ORDER BY S.id LIMIT `+limit,['%'+query+'%','%'+query+'%','%'+query+'%'], (err, res) => {
       if (err) { return reject(err); }
-      if (res.length == 0) { return reject(); }
+      if (res.length == 0) { return reject("ulu"); }
       return resolve(res);
     });
   });
@@ -77,7 +78,7 @@ Stock.stockData = (stockid,range) => {
               WHERE stockid = ? AND datediff(CURRENT_DATE(), date) < ?
               ORDER BY date DESC`, [stockid,range], (err, res) => {
       if (err) { return reject(err); }
-      if (res.length == 0) { return reject(); }
+      if (res.length == 0) { const empty = []; return resolve(empty); }
       return resolve(res);
     });
   });
@@ -90,6 +91,21 @@ Stock.fetchSuggestion = (ignoresymbol) => {
                  COALESCE((SELECT close FROM stock_data WHERE stockid = S.id ORDER BY date DESC LIMIT 1),0) as price
               FROM stock S
               WHERE symbol != ? ORDER BY RAND() LIMIT 4`, [ignoresymbol], (err, res) => {
+      if (err) { return reject(err); }
+      if (res.length == 0) { return reject(); }
+      return resolve(res);
+    });
+  });
+};
+
+Stock.searchSuggestion = (query) => {
+  return new Promise((resolve, reject) => {
+    sql.query(`SELECT *,COALESCE((SELECT close FROM stock_data WHERE stockid = T.id ORDER BY date DESC LIMIT 1),0) as price
+               FROM
+                (SELECT * FROM stock WHERE name LIKE ? OR symbol LIKE ?
+                UNION
+                 SELECT * FROM stock WHERE about LIKE ?) t
+              LIMIT 6`, ['%'+query+'%','%'+query+'%','%'+query+'%'], (err, res) => {
       if (err) { return reject(err); }
       if (res.length == 0) { return reject(); }
       return resolve(res);
