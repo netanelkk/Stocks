@@ -7,7 +7,7 @@ import Async from "react-async";
 function Stocks(props) {
     const { topRef } = props;
     const { query } = useParams();
-    const [homeStocks, setHomeStocks] = useState(null);
+    const [count, setCount] = useState(0);
 
     useEffect(() => {
         topRef.current.scrollTop = 0;
@@ -16,6 +16,7 @@ function Stocks(props) {
     const getData = async () => {
         const d = await fetchAll((query) ? query : "");
         if (!d.pass) throw new Error(d.msg);
+        setCount(d.data.length);
         return d.data;
     }
 
@@ -27,7 +28,10 @@ function Stocks(props) {
                         if (isPending) return (<>Loading..</>);
                         if (error) return (<>No results</>);
                         if (data) {
-                            return (data.map(stock => (<StockWidget stock={stock} key={"stock" + stock.id} />)))
+                            return (<>
+                                <h2 className="stocks-title">{(query ? count + ' Results for "' + decodeURI(query) + '"' : "All Stocks")}</h2>
+                                {data.map(stock => (<StockWidget stock={stock} key={"stock" + stock.id} />))}
+                                </>)
                         }
                     }}
                 </Async>

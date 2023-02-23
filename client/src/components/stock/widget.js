@@ -6,7 +6,7 @@ function round3digits(x) {
 }
 
 export default function StockWidget(props) {
-    const { stock } = props;
+    const { stock, showoptions } = props;
     const [stockDifference, setStockDifference] = useState(stock.preprice != 0 ? round3digits(stock.price - stock.preprice) : 0);
     const [stockDifferencePercentage, setStockDifferencePercentage] = useState((stock.preprice != 0 ? round3digits(stockDifference/stock.preprice*100) : 0));
 
@@ -14,7 +14,7 @@ export default function StockWidget(props) {
         <div className="stock-widget col-lg-3">
             <Link to={window.PATH + "/stock/" + stock.symbol}>
             <div className="stock">
-                <div className="stock-option"><i className="bi bi-three-dots-vertical"></i></div>
+                {showoptions && <div className="stock-option"><i className="bi bi-three-dots-vertical"></i></div>}
                 <div className="stock-img">
                     <div>
                         <img src={window.PATH+"/images/stocks/" + stock.icon} />

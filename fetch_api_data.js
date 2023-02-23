@@ -30,8 +30,11 @@ function getStockData(symbol, stockid, timeindex = 0) {
         if (Object.keys(apidata).length === 1) {
           console.log("Too many calls, waiting 60 seconds...");
           setTimeout(() => {
+            return getStockData(symbol, stockid, timeindex);
+            /*
             getStockData(symbol, stockid, timeindex);
             return resolve();
+            */
           }, 1000 * 60);
         } else {
           const timeseries = apidata[Object.keys(apidata)[1]];
@@ -68,9 +71,11 @@ async function run() {
 
   console.log("/*** GET API DATA ***/");
   for(let i = 0; i < rows.length; i++) {
+    await getStockData(rows[i].symbol, rows[i].id);
+    /*
     for(let j = 0; j < 30; j++) {
       await getStockData(rows[i].symbol, rows[i].id, j);
-    }
+    }*/
   }
 
   console.log("---------------");

@@ -1,3 +1,5 @@
+const token = localStorage.getItem('token');
+
 async function request(url, data, requestMethod = "POST") {
   let resp;
   let request = {
@@ -9,6 +11,10 @@ async function request(url, data, requestMethod = "POST") {
     request.body = JSON.stringify(data);
   }
 
+  if(token != null) {
+    request.headers["Authorization"] = 'Bearer '+token;
+  }
+  
   return await fetch(url, request).then((response) => {
     resp = response;
     return response.json();
@@ -32,12 +38,6 @@ if (local) {
   API_URL = "http://10.0.0.10:5000";
 } else {
   API_URL = "https://netanel.vps.webdock.cloud:5000";
-}
-
-
-
-export async function login({ username, password }) {
-  return await request(API_URL + "/auth/login", { username, password });
 }
 
 export async function fetchHome() {
@@ -68,3 +68,10 @@ export async function suggestion(query) {
   return await request(API_URL + "/stock/suggestion/"+query, "", "GET");
 }
 
+export async function auth({ code }) {
+  return await request(API_URL + "/user/auth", { code });
+}
+
+export async function mydetails() {
+  return await request(API_URL + "/user/mydetails", "", "GET");
+}

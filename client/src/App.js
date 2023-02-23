@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef,useState } from 'react'
 import Homepage from './components/homepage';
 import Stocks from './components/homepage/stocks';
 import Stock from './components/stock';
@@ -15,7 +15,7 @@ import './App.css';
 window.PATH = "";
 
 // list of pages with hidden menu
-const fullpages = ["stock"];
+const fullpages = ["stock","stocks"];
 
 const Pages = React.memo(() => {
   const { pathname } = useLocation();
@@ -41,10 +41,21 @@ const Pages = React.memo(() => {
 });
 
 function App() {
+  const [isUserSignedIn, setIsUserSignedIn] = useState(localStorage.getItem('token') != null);  
+
+  const onLogout = () => {
+    localStorage.removeItem("token"); 
+    localStorage.removeItem("myid"); 
+    setIsUserSignedIn(false);
+    window.location.href = "";
+  };
+
   return (
     <BrowserRouter>
-      <Header />
-      <Pages />
+      <Header isUserSignedIn={isUserSignedIn} onLogout={onLogout}
+           setIsUserSignedIn={setIsUserSignedIn} />
+      <Pages isUserSignedIn={isUserSignedIn}
+           setIsUserSignedIn={setIsUserSignedIn} />
     </BrowserRouter>
   );
 }

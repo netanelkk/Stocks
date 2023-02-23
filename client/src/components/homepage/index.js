@@ -13,7 +13,7 @@ const Article = ({ data }) => {
                 <p>
                     {data.content}
                 </p>
-                <div><a href={data.link} target="_blank"><button>Continue Reading <i className="bi bi-box-arrow-up-right"></i></button></a></div>
+                <div><a href={data.link} target="_blank"><button>Continue Reading<i className="bi bi-box-arrow-up-right"></i></button></a></div>
             </div>
         </div>
     );

@@ -19,7 +19,7 @@ Stock.fetch = (query=null,limit=8) => {
 
 Stock.allSymbols = () => {
   return new Promise((resolve, reject) => {
-    sql.query(`SELECT id, symbol FROM stock`, (err, res) => {
+    sql.query(`SELECT id, symbol FROM stock WHERE id > 34`, (err, res) => {
       if (err) { return reject(err); }
       if (res.length == 0) { return reject(); }
       return resolve(res);

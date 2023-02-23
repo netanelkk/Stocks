@@ -8,7 +8,8 @@ class Server {
     this.port = 5000;
     this.paths = {
       main: "/main",
-      stock: "/stock"
+      stock: "/stock",
+      user: "/user"
     };
 
     this.middlewares();
@@ -27,7 +28,7 @@ class Server {
 /*
     this.app.use(function(req,res,next){
       setTimeout(next, 1000);
-    });
+    }); 
 */
   }
 
@@ -35,6 +36,7 @@ class Server {
   routes() {
     this.app.use(this.paths.main, require("../routes/main"));
     this.app.use(this.paths.stock, require("../routes/stock"));
+    this.app.use(this.paths.user, require("../routes/user"));
   }
 
   listen() {

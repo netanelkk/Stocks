@@ -2,7 +2,6 @@ var express = require('express');
 var router = express.Router();
 const db = require('../models/database');
 
-
 router.get('/', function (req, res, next) {
   db.Stock.fetch().then((rows) => {
     res.json({ data: rows });
@@ -36,6 +35,8 @@ router.get('/stocks/:query', function (req, res, next) {
   });
 });
 
+
+
 const fetch = (query="",limit=100) => {
   return new Promise((resolve, reject) => {
     db.Stock.fetch(query,limit).then(result => {
@@ -45,6 +46,7 @@ const fetch = (query="",limit=100) => {
     });
   });
 }
+
 
 module.exports = router;
 

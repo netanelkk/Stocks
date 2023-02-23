@@ -8,7 +8,7 @@ var opts = {}
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 opts.secretOrKey = 'ninja';
 passport.use(new JwtStrategy(opts, async function(jwt_payload, done) {
-    db.User.authToken(jwt_payload.id, jwt_payload.email).then(rows => {
+    db.User.authToken(jwt_payload.googleid, jwt_payload.email).then(rows => {
         return done(null, rows[0]);
     }).catch(() => {
         return done(null, "false");
