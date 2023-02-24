@@ -20,7 +20,7 @@ router.post('/auth', function (req, res, next) {
       let data = jwt_decode(result.tokens.id_token);
       db.User.register(data).then(rows => {
         const user = rows[0];
-        const userToken = { googleid: user.googleid , email: user.email };
+        const userToken = { id: user.id , googleid: user.googleid, email: user.email };
         const token = jwt.sign(userToken, 'ninja', {expiresIn: '5y'});
         res.json({ token: token });
       }).catch(e => {
@@ -35,9 +35,9 @@ router.post('/auth', function (req, res, next) {
 
 
 router.get('/mydetails',passport.authenticate('jwt', { session: false }), function(req, res) {
-    const googleid = req.user.googleid;
-    if(googleid) {
-      db.User.details(googleid).then(rows => {
+    const userId = req.user.id;
+    if(userId) {
+      db.User.details(userId).then(rows => {
           res.json({ data: rows });
       }).catch(e => {
           return res.status(400).json({ msg: e });

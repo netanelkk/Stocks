@@ -75,3 +75,15 @@ export async function auth({ code }) {
 export async function mydetails() {
   return await request(API_URL + "/user/mydetails", "", "GET");
 }
+
+export async function addComment(stockId, content) {
+  return await request(API_URL + "/stock/addcomment/"+stockId, { content });
+}
+
+export async function fetchComments(id, page) {
+  return await request(API_URL + "/stock/"+id+"/comments/"+page, "", "GET");
+}
+
+export async function deletecomment(id) {
+  return await request(API_URL + "/stock/deletecomment/"+id, "", "DELETE");
+}

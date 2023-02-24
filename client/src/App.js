@@ -12,12 +12,16 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import './App.css';
 
+import TimeAgo from 'javascript-time-ago'
+import en from 'javascript-time-ago/locale/en.json'
+TimeAgo.addDefaultLocale(en);
+
 window.PATH = "";
 
 // list of pages with hidden menu
 const fullpages = ["stock","stocks"];
 
-const Pages = React.memo(() => {
+const Pages = React.memo(({isUserSignedIn}) => {
   const { pathname } = useLocation();
   const showmenu = !fullpages.includes(pathname.split("/")[1]);
   const topRef = useRef();
@@ -31,7 +35,7 @@ const Pages = React.memo(() => {
           <Route path={window.PATH + "/stocks"} element={<Stocks topRef={topRef} />} >
             <Route path=":query" />
           </Route>
-          <Route path={window.PATH + "/stock"} element={<Stock topRef={topRef} />}>
+          <Route path={window.PATH + "/stock"} element={<Stock topRef={topRef} isUserSignedIn={isUserSignedIn} />}>
             <Route path=":symbol" />
           </Route>
         </Routes>

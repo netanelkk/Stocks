@@ -95,10 +95,6 @@ body {
     margin: 0 10px;
 }
 
-.userheader {
-    cursor: pointer;
-}
-
 .userheader img {
     width: 40px;
     height: 40px;
@@ -107,6 +103,13 @@ body {
     outline: 5px solid #0a0c1a;
     transition: outline 0.1s linear;
     position: relative;
+    cursor: pointer;
+}
+
+.userheader h2 {
+    font-weight: bold;
+    font-size: 14pt;
+    padding: 10px 0 0 10px;
 }
 
 .userheader img:hover {
@@ -181,7 +184,7 @@ body {
     border: 1px solid #2b3151;
     border-bottom: none;
     border-right: none;
-
+    width: calc(100% - 230px);
 }
 
 .page.withmenu {
@@ -346,7 +349,7 @@ body {
     outline: none;
     font-size: 10pt;
     padding: 5px 5px 5px 0;
-    color: #c5f2ff;
+    color: #9fbdf5;
     background: none;
 }
 
@@ -559,6 +562,27 @@ body {
 .comments {
     height: 300px;
     overflow-y: scroll;
+    border: 1px solid #1c2137;
+    padding: 0 10px;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.loadmore {
+    background: none;
+    border: none;
+    outline: none;
+    color: #c6e7ff;
+    font-size: 10pt;
+    padding: 10px;
+}
+
+.loadmore:hover {
+    text-decoration: underline;
+}
+
+.hide {
+    display: none !important;
 }
 
 .comment {
@@ -567,14 +591,20 @@ body {
     margin: 10px 0;
 }
 
-.comment span {
-    font-size: 8pt;
-    color: #cecece;
+.commenthead {
+    display: flex;
+    align-items: center;
+    cursor: default;
 }
 
-.comment span b {
-    color: #94c3ff;
-    cursor: pointer;
+.commenthead span {
+    font-size: 8pt;
+    color: #cecece;
+    letter-spacing: 0.4px;
+    flex: 1;
+}
+
+.commenthead b {
     font-size: 12pt;
 }
 
@@ -593,9 +623,8 @@ body {
     border: none;
     outline: none;
     color: white;
-    cursor: pointer;
-    padding: 10px;
     margin-left: 5px;
+    width: 24px;
 }
 
 .new-comment button:active {
@@ -619,7 +648,72 @@ body {
 
 .stock-widget {
     margin: 10px 0;
+    transition: margin 0.5s ease-in-out;
+    height: 130px;
 }
+
+.frame2 {
+    margin-left: -100%;
+}
+
+.frame3 {
+    margin-left: -200%;
+}
+
+.frame4 {
+    margin-left: -300%;
+}
+
+
+/*
+
+.row .stock-widget:nth-child(1) {
+
+}
+    margin-left: 0;
+    animation: carousel 24s ease-in-out;
+    animation-iteration-count: infinite;
+    animation-delay: 0s;
+    animation-fill-mode: forwards;
+@keyframes carousel {
+    0% {
+        margin-left: 0;
+    }
+
+    20% {
+        margin-left: 0;
+    }
+
+    25% {
+        margin-left: -100%;
+    }
+
+    45% {
+        margin-left: -100%;
+    }
+
+    50% {
+        margin-left: -200%;
+    }
+
+    70% {
+        margin-left: -200%;
+    }
+
+    75% {
+        margin-left: -300%;
+    }
+
+    90% {
+        margin-left: -300%;
+    }
+
+    100% {
+        margin-left: 0;
+    }
+}
+
+*/
 
 .stock-widget a,
 .header a {
@@ -773,7 +867,7 @@ body {
 
 .userheader i {
     padding-right: 10px;
-    color:#b3cfff;
+    color: #b3cfff;
 }
 
 .profile-menu {
@@ -786,39 +880,201 @@ body {
     border-radius: 10px;
     box-shadow: 0 15px 30px black;
     animation: show-menu 0.25s ease;
-    animation-fill-mode: forwards; 
+    animation-fill-mode: forwards;
     z-index: 101;
 }
 
 .profile-menu ul {
     margin: 0;
     padding: 0;
-  }
+}
 
 
-  .profile-menu ul li {
+.profile-menu ul li {
     list-style: none;
     text-align: left;
     padding: 15px;
     color: white;
     transition: color 0.2s ease;
-  }
+}
 
-  .profile-menu ul li:hover {
+.profile-menu ul li:hover {
     color: #b3cfff;
-  }
+}
 
-  .profile-menu ul li i {
+.profile-menu ul li i {
     margin-right: 5px;
-  }
+}
 
-  @keyframes show-menu {
+@keyframes show-menu {
     from {
-      margin-top: 20px;
-      opacity: 0;
+        margin-top: 20px;
+        opacity: 0;
     }
+
     to {
         margin-top: 10px;
-      opacity: 1;
+        opacity: 1;
     }
-  }
+}
+
+.loading {
+    background: url("../public/images/loading.gif");
+    background-size: 24px 24px;
+    width: 24px;
+    height: 24px;
+    margin-right: 7px;
+}
+
+.comment-form {
+    display: flex;
+    flex: 1;
+}
+
+.tagname {
+    font-size: 8pt;
+    background: #0e101a;
+    margin: 0 20px 0 5px;
+    text-align: center;
+    border-radius: 100px;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    flex-direction: column;
+    letter-spacing: 1px;
+    padding: 2px 7px;
+}
+
+.delete-comment {
+    font-size: 12pt;
+    cursor: pointer;
+    color: #ae60609c;
+}
+
+.delete-comment:active {
+    color: #ae60606e;
+}
+
+.commenthead .loading {
+    margin: 0;
+}
+
+.carousel {
+    width: 100%;
+    text-align: right;
+}
+
+.carousel .row {
+    align-items: stretch;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: scroll;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    text-align: left;
+    margin: 0;
+}
+
+.carousel .row::-webkit-scrollbar {
+    display: none;
+}
+
+.control-arrows {
+    display: flex;
+    justify-content: right;
+}
+
+.arrow-left,
+.arrow-right {
+    background: #ffffffb3;
+    width: 35px;
+    height: 35px;
+    color: black;
+    border-radius: 100%;
+    text-align: center;
+    display: flex;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.692);
+    cursor: pointer;
+    margin: 0 7px;
+    transition: background 0.1s linear;
+}
+
+.arrow-left:hover,
+.arrow-right:hover {
+    background: #ffffffe5;
+}
+
+.control {
+    display: inline-block;
+}
+
+.progress-container {
+    width: 100%;
+    background: #0b0e1a;
+    height: 6px;
+    margin: 10px auto;
+    border-radius: 50px;
+    overflow: hidden;
+    border: 1px solid #252b44;
+}
+
+.carousel-progress {
+    background: #ffffffb3;
+    width: 100%;
+    height: 100%;
+}
+
+.startprogress {
+    animation: progress-animation 3s linear;
+    animation-iteration-count: infinite;
+    animation-fill-mode: forwards;
+    animation-play-state: running;
+}
+
+.pause {
+    animation-play-state: paused;
+}
+
+
+@keyframes progress-animation {
+    0% {
+        width: 100%;
+    }
+
+    100% {
+        width: 0%;
+    }
+}
+
+.carousel-nav {
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+}
+
+.carousel-nav li {
+    list-style: none;
+    background: #ffffffb3;
+    width: 10px;
+    height: 10px;
+    border-radius: 100%;
+    margin: 10px;
+    cursor: pointer;
+    transition: all 0.1s linear;
+}
+
+.carousel-nav li.active {
+    background: white;
+    box-shadow: 0 0 10px #a2a2a2;
+}
+
+.carousel-nav li:hover {
+    border: 1px solid #d9d9d9;
+}

@@ -1,8 +1,9 @@
 const sql = require("..");
 
 const Stock = {};
+const COMMENT_PAGE_OFFSET = 15;
 
-Stock.fetch = (query=null,limit=8) => {
+Stock.fetch = (query=null,limit=16) => {
   return new Promise((resolve, reject) => {
     sql.query(`SELECT *,
                  COALESCE((SELECT close FROM stock_data WHERE stockid = S.id ORDER BY date DESC LIMIT 1,1),0) as preprice,
@@ -19,7 +20,7 @@ Stock.fetch = (query=null,limit=8) => {
 
 Stock.allSymbols = () => {
   return new Promise((resolve, reject) => {
-    sql.query(`SELECT id, symbol FROM stock WHERE id > 34`, (err, res) => {
+    sql.query(`SELECT id, symbol FROM stock`, (err, res) => {
       if (err) { return reject(err); }
       if (res.length == 0) { return reject(); }
       return resolve(res);
@@ -112,6 +113,48 @@ Stock.searchSuggestion = (query) => {
     });
   });
 };
+
+Stock.addComment = (userId, content, stockId) => {
+  return new Promise((resolve,reject) => {
+    sql.query(`INSERT INTO comment (userId, content, stockid) VALUES(?,?,?)`,[userId, content, stockId], (err, res) => {
+      if (err) { return reject(err); } 
+      return resolve();
+   });
+  });
+}
+
+Stock.fetchComments = (stockid, page) => {
+  return new Promise((resolve,reject) => {
+    sql.query(`SELECT C.id, C.content, C.date, U.name, U.id as userid
+                FROM comment C
+                JOIN user U
+                ON C.userid = U.id
+                WHERE stockid=? ORDER BY C.id DESC LIMIT ?,?`,[stockid, (page-1)*COMMENT_PAGE_OFFSET, COMMENT_PAGE_OFFSET], (err, res) => {
+      if (err) { return reject(err);} 
+      if (res.length == 0) { return reject(); }
+      return resolve(res);
+   });
+  });
+}
+
+Stock.countComments = (stockid) => {
+  return new Promise((resolve,reject) => {
+    sql.query(`SELECT id FROM comment WHERE stockid=?`,[stockid], (err, res) => {
+      if (err) { return reject(err);} 
+      return resolve(res.length);
+   });
+  });
+}
+
+Stock.deleteComment = (commentid, userid) => {
+  return new Promise((resolve,reject) => {
+    sql.query(`DELETE FROM comment WHERE id=? AND userid=?`, [commentid, userid], (err, res) =>{
+      if (err) { return reject(err); } 
+      if(res.affectedRows == 0) { return reject("Action couldn't complete"); }
+      return resolve(res);
+   });
+  });
+}
 
 module.exports = Stock;
 

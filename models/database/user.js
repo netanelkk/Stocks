@@ -15,16 +15,16 @@ User.register = async (data) => {
 
 User.tokenDetails = (googleid) => {
     return new Promise((resolve, reject) => {
-        sql.query("SELECT googleid,email FROM user WHERE googleid=?",[googleid], (err, res) => {
+        sql.query("SELECT id,googleid,email FROM user WHERE googleid=?",[googleid], (err, res) => {
             if (err) { return reject(err); }
             return resolve(res);
         });
     });
 };
 
-User.details = (googleid) => {
+User.details = (id) => {
     return new Promise((resolve, reject) => {
-        sql.query("SELECT * FROM user WHERE googleid=?",[googleid], (err, res) => {
+        sql.query("SELECT * FROM user WHERE id=?",[id], (err, res) => {
             if (err) { return reject(err); }
             return resolve(res);
         });

@@ -131,6 +131,7 @@ const Search = () => {
 
 const Login = ({ onLogout, isUserSignedIn, setIsUserSignedIn }) => {
     const [profile, setProfile] = useState("https://cdn4.buysellads.net/uu/1/127419/1670532337-Stock2.jpg");
+    const [name, setName] = useState("");
     const [showMenu, setShowMenu] = useState(false);
 
     const onLoginSuccessful = () => {
@@ -155,8 +156,10 @@ const Login = ({ onLogout, isUserSignedIn, setIsUserSignedIn }) => {
         async function getDetails() {
             const d = await mydetails();
             if (d.pass) {
-                console.log(d);
                 setProfile(d.data[0].picture);
+                setName(d.data[0].name)
+                if(localStorage.getItem('myid') === null)
+                    localStorage.setItem("myid", d.data[0].id);
             } else {
                 if (d.msg === "AUTH_FAIL")
                     onLogout();
@@ -198,6 +201,7 @@ const Login = ({ onLogout, isUserSignedIn, setIsUserSignedIn }) => {
                     <img src={profile} onClick={openMenu} />
                     {showMenu && 
                     <div className="profile-menu">
+                        <h2>Hello {name}</h2>
                         <ul>
                             <Link to={window.PATH + "/settings"} onClick={() => { setShowMenu(false); }}><li><i className="bi bi-gear"></i> Settings</li></Link>
                             <Link to={window.PATH + "/#logout"} onClick={(e) => { e.preventDefault(); setShowMenu(false); onLogout(); }}><li><i className="bi bi-box-arrow-right"></i> Logout</li></Link>
