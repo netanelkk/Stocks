@@ -101,19 +101,6 @@ const Graph = ({ stockid }) => {
 }
 
 const StockElements = ({ data }) => {
-    const [stockDifference, setStockDifference] = useState(0);
-    const [stockDifferencePercentage, setStockDifferencePercentage] = useState(0);
-
-    const calculateDiff = () => {
-        const stockdiff = data.preprice != 0 ? round3digits(data.close - data.preprice) : 0;
-        const stockdiffper = (data.preprice != 0 ? round3digits(stockdiff / data.preprice * 100) : 0);
-        setStockDifference(stockdiff);
-        setStockDifferencePercentage(stockdiffper);
-    }
-
-    useEffect(() => {
-        calculateDiff();
-    }, []);
 
     return (
         <>
@@ -126,9 +113,9 @@ const StockElements = ({ data }) => {
                 <h1>{data.name + " (" + data.symbol + ")"}</h1>
                 <div>
                     <span className="stock-price">{"$" + data.close}</span>
-                    <div className={"stock-info " + ((stockDifference < 0) ? "negative" : "positive")}>
-                        <span>{stockDifference}</span>
-                        <span>{isNaN(stockDifferencePercentage) ? 0 : stockDifferencePercentage + "%"}</span>
+                    <div className={"stock-info " + ((data.stock_difference < 0) ? "negative" : "positive")}>
+                        <span>{data.stock_difference}</span>
+                        <span>{data.stock_difference_percentage + "%"}</span>
                     </div>
                 </div>
             </div>
@@ -240,7 +227,7 @@ const Comment = ({ comment, setCommentCount }) => {
     const commentBox = useRef(null);
     const [disabled, setDisabled] = useState(false);
     const allowDelete = (localStorage.getItem("myid") == comment.userid);
-  
+
     const deleteClick = async (e) => {
         const target = e.currentTarget;
         if (!disabled) {
@@ -260,13 +247,13 @@ const Comment = ({ comment, setCommentCount }) => {
     }
 
     const [actionText, setActionText] = useState(deleteText(deleteClick));
-    const loading = (show=true) => {
-        if(show) {
-          setDisabled(true);
-          setActionText(loadingText);
-        }else{
-          setDisabled(false);
-          setActionText(deleteText(deleteClick));
+    const loading = (show = true) => {
+        if (show) {
+            setDisabled(true);
+            setActionText(loadingText);
+        } else {
+            setDisabled(false);
+            setActionText(deleteText(deleteClick));
         }
     }
 
@@ -396,7 +383,6 @@ function Stock(props) {
     return (
         <>
             <ReactTooltip />
-
             <Async promiseFn={getData}>
                 {({ data, error, isPending }) => {
                     if (isPending) return (<>Loading..</>);
@@ -414,7 +400,7 @@ function Stock(props) {
                                     if (data) {
                                         return (
                                             <>
-                                                <h1>See Also</h1>
+                                                <h1 id="seealso">See Also</h1>
                                                 <div className="row">
                                                     {data.map(stock => (<StockWidget stock={stock} key={"suggestion" + stock.id} />))}
                                                 </div>

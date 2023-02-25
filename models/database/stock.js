@@ -3,11 +3,15 @@ const sql = require("..");
 const Stock = {};
 const COMMENT_PAGE_OFFSET = 15;
 
+// Calculate price, previous price, stock difference, stock difference percentage in SELECT statement
+Stock.select_calculated = `TRUNCATE((@preprice:=COALESCE((SELECT close FROM stock_data WHERE stockid = S.id ORDER BY date DESC LIMIT 1,1),0)),2) as preprice,
+                           TRUNCATE((@price:=COALESCE((SELECT close FROM stock_data WHERE stockid = S.id ORDER BY date DESC LIMIT 1),0)),2) as price,
+                           TRUNCATE(COALESCE((@diff:=@price-@preprice)),3) as stock_difference,
+                           TRUNCATE(COALESCE((@price-@preprice)/@preprice*100,0),3) as stock_difference_percentage`;
+
 Stock.fetch = (query=null,limit=16) => {
   return new Promise((resolve, reject) => {
-    sql.query(`SELECT *,
-                 COALESCE((SELECT close FROM stock_data WHERE stockid = S.id ORDER BY date DESC LIMIT 1,1),0) as preprice,
-                 COALESCE((SELECT close FROM stock_data WHERE stockid = S.id ORDER BY date DESC LIMIT 1),0) as price
+    sql.query(`SELECT *,` + Stock.select_calculated + `
               FROM stock S ` +
               ((query) ? ` WHERE S.name LIKE ? OR S.symbol LIKE ? OR S.about LIKE ? ` : ``)
              + ` ORDER BY S.id LIMIT `+limit,['%'+query+'%','%'+query+'%','%'+query+'%'], (err, res) => {
@@ -38,12 +42,13 @@ Stock.insertStockData = (d) => {
   });
 };
 
+
 Stock.fetchBySymbol = (symbol) => {
   return new Promise((resolve, reject) => {
     sql.query(`SELECT S.*,
-                  COALESCE((SELECT close FROM stock_data WHERE stockid = S.id ORDER BY date DESC LIMIT 1,1),0) as preprice,
-                  COALESCE(SD.open,0) open, COALESCE(SD.close,0) close, COALESCE(SD.high,0) high, COALESCE(SD.low,0) low,
-                  COALESCE(SP.open,0) predopen, COALESCE(SP.close,0) predclose, COALESCE(SP.high,0) predhigh, COALESCE(SP.low,0) predlow
+                ` + Stock.select_calculated + `,
+                COALESCE(SD.open,0) open, COALESCE(SD.close,0) close, COALESCE(SD.high,0) high, COALESCE(SD.low,0) low,
+                COALESCE(SP.open,0) predopen, COALESCE(SP.close,0) predclose, COALESCE(SP.high,0) predhigh, COALESCE(SP.low,0) predlow
                FROM stock S
                LEFT JOIN stock_data SD
                ON S.id = SD.stockid
@@ -87,9 +92,7 @@ Stock.stockData = (stockid,range) => {
 
 Stock.fetchSuggestion = (ignoresymbol) => {
   return new Promise((resolve, reject) => {
-    sql.query(`SELECT *,
-                 COALESCE((SELECT close FROM stock_data WHERE stockid = S.id ORDER BY date DESC LIMIT 1,1),0) as preprice,
-                 COALESCE((SELECT close FROM stock_data WHERE stockid = S.id ORDER BY date DESC LIMIT 1),0) as price
+    sql.query(`SELECT *,` + Stock.select_calculated + `
               FROM stock S
               WHERE symbol != ? ORDER BY RAND() LIMIT 4`, [ignoresymbol], (err, res) => {
       if (err) { return reject(err); }
@@ -156,5 +159,14 @@ Stock.deleteComment = (commentid, userid) => {
   });
 }
 
+Stock.allCategories = () => {
+  return new Promise((resolve,reject) => {
+    sql.query(`SELECT * FROM stock_category`, (err, res) => {
+      if (err) { return reject(err);} 
+      if (res.length == 0) { return reject(); }
+      return resolve(res);
+   });
+  });
+}
 module.exports = Stock;
 

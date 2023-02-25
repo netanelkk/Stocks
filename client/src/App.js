@@ -5,6 +5,8 @@ import Stock from './components/stock';
 import Header from './components/header';
 import Menu from './components/header/menu';
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import Top from './components/pages/top';
+import Saved from './components/pages/saved';
 
 // Bootstrap CSS
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -38,6 +40,8 @@ const Pages = React.memo(({isUserSignedIn}) => {
           <Route path={window.PATH + "/stock"} element={<Stock topRef={topRef} isUserSignedIn={isUserSignedIn} />}>
             <Route path=":symbol" />
           </Route>
+          <Route path={window.PATH + "/top"} element={<Top topRef={topRef} isUserSignedIn={isUserSignedIn} />} />
+          <Route path={window.PATH + "/saved"} element={<Saved topRef={topRef} isUserSignedIn={isUserSignedIn} />} />
         </Routes>
       </div>
     </div>

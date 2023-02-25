@@ -87,3 +87,7 @@ export async function fetchComments(id, page) {
 export async function deletecomment(id) {
   return await request(API_URL + "/stock/deletecomment/"+id, "", "DELETE");
 }
+
+export async function fetchCategories() {
+  return await request(API_URL + "/main/categories", "", "GET");
+}
