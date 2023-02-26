@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { StockWidget } from '../stock/widget';
 import { fetchAll } from '../../api';
-import Async from "react-async";
-import { Link } from "react-router-dom";
-
 
 function Top(props) {
     const { topRef } = props;
@@ -41,14 +38,14 @@ function Top(props) {
             <div className="top-row">
                 <div className="row-column">
                     <div className="top-title">
-                        <i class="bi bi-arrow-up-circle-fill"></i>
+                        <i className="bi bi-arrow-up-circle-fill"></i>
                         <div>Percentage</div>
                     </div>
                     {topPercentage && topPercentage.map((stock,i) => (<StockWidget i={i} stock={stock} key={"stock" + stock.id} isColumn={true} />))}
                 </div>
                 <div className="row-column">
                     <div className="top-title">
-                        <i class="bi bi-arrow-down-circle-fill"></i>
+                        <i className="bi bi-arrow-down-circle-fill"></i>
                         <div>Percentage</div>
                     </div>
                     {lowPercentage && lowPercentage.map((stock,i) => (<StockWidget i={i} stock={stock} key={"stock" + stock.id} isColumn={true} />))}
@@ -58,14 +55,14 @@ function Top(props) {
             <div className="top-row">
                 <div className="row-column">
                     <div className="top-title">
-                        <i class="bi bi-arrow-up-circle-fill"></i>
+                        <i className="bi bi-arrow-up-circle-fill"></i>
                         <div>Price Difference</div>
                     </div>
                     {topDifference && topDifference.map((stock,i) => (<StockWidget i={i} stock={stock} key={"stock" + stock.id} isColumn={true} />))}
                 </div>
                 <div className="row-column">
                     <div className="top-title">
-                        <i class="bi bi-arrow-down-circle-fill"></i>
+                        <i className="bi bi-arrow-down-circle-fill"></i>
                         <div>Price Difference</div>
                     </div>
                     {lowDifference && lowDifference.map((stock,i) => (<StockWidget i={i} stock={stock} key={"stock" + stock.id} isColumn={true} />))}

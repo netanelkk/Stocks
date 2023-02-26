@@ -91,3 +91,7 @@ export async function deletecomment(id) {
 export async function fetchCategories() {
   return await request(API_URL + "/main/categories", "", "GET");
 }
+
+export async function mysaved() {
+  return await request(API_URL + "/user/mysaved", "", "GET");
+}

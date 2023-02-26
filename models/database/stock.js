@@ -16,7 +16,7 @@ Stock.fetch = (query=null,limit=16) => {
               ((query) ? ` WHERE S.name LIKE ? OR S.symbol LIKE ? OR S.about LIKE ? ` : ``)
              + ` ORDER BY S.id LIMIT `+limit,['%'+query+'%','%'+query+'%','%'+query+'%'], (err, res) => {
       if (err) { return reject(err); }
-      if (res.length == 0) { return reject("ulu"); }
+      if (res.length == 0) { return reject(); }
       return resolve(res);
     });
   });
@@ -168,5 +168,21 @@ Stock.allCategories = () => {
    });
   });
 }
+
+Stock.mySaved = (userid) => {
+  return new Promise((resolve, reject) => {
+    sql.query(`SELECT *,` + Stock.select_calculated + `
+                FROM saved_stocks SS
+                JOIN stock S
+                ON SS.stockid = S.id
+                WHERE userid = ?
+                ORDER BY SS.order DESC`,[userid], (err, res) => {
+      if (err) { return reject(err); }
+      if (res.length == 0) { return reject(); }
+      return resolve(res);
+    });
+  });
+};
+
 module.exports = Stock;
 

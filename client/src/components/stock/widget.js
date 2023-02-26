@@ -6,7 +6,7 @@ export default function StockWidget(props) {
     const { stock, showoptions, isColumn, i } = props;
 
     return (
-        <div className={"stock-widget" + (isColumn ? "" : " col-lg-3")}>
+        <div className={"stock-widget" + (isColumn ? "" : " col-lg-3")} draggable="true">
             <Link to={window.PATH + "/stock/" + stock.symbol}>
             <div className={"stock" + (i===0 && isColumn ? " top-stock" : "")}>
                 {showoptions && <div className="stock-option"><i className="bi bi-three-dots-vertical"></i></div>}

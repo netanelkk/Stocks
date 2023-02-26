@@ -247,7 +247,7 @@ body {
     position: relative;
     border-bottom: 5px solid #1b2034;
     cursor: pointer;
-    transition: all 0.1s linear;
+    transition: border 0.1s linear;
 }
 
 .stock:hover {
@@ -814,6 +814,11 @@ body {
     margin: 0 0 0 15px;
     border-radius: 10px;
     border: 1px solid #444b716e;
+    user-select: none;
+}
+
+.stocks-title .navbar a {
+    user-select: none;
 }
 
 .stock-title .container {
@@ -1136,7 +1141,9 @@ body {
 .categories {
     border-bottom: 1px solid #2b31516e;
     margin-bottom: 10px;
-    padding-bottom: 20px;
+    padding-bottom: 30px;
+    padding-top: 10px;
+    user-select: none;
 }
 
 .categories span {
@@ -1147,10 +1154,34 @@ body {
     cursor: pointer;
 }
 
-.categories span:hover, .categories span.active {
+.categories span:hover {
     background: #1d2137;
+}
+
+.categories span.active {
+    background: #444b716e;
 }
 
 .categories span i {
     margin-right: 7px;
 }
+
+.stock.over {
+    opacity: 0.8;
+}
+
+.dragrow, .dragrow .stock-widget { 
+    position: relative;
+}
+
+.dragrow .stock {
+    position: absolute;
+    left: 0;
+    width: calc(100% - 20px);
+
+}
+
+.dragrow .stock.removeanimation { 
+    transition: none;
+}
+

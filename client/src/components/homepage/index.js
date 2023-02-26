@@ -35,6 +35,11 @@ function Homepage() {
         if (homeStocks) {
             Carousel.init();
         }
+
+        // clear interval on unmount
+        return () => {
+            clearInterval(Carousel.interval);
+        };
     }, [homeStocks]);
 
     const getArticles = async () => {

@@ -6,35 +6,55 @@ import Async from "react-async";
 import { Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import Container from 'react-bootstrap/Container';
 
-let filteredvar = [];
-const Cat = ({ cat, filter }) => {
+const Categories = ({ categories, filtered, setFiltered }) => {
+    const filter = (catid) => {
+        if (filtered.includes(catid)) {
+            setFiltered(filtered.filter(item => item !== catid));
+        } else {
+            setFiltered(items => [catid].concat(items));
+        }
+    }
 
     return (
-        <span className={(filteredvar.includes(cat.id) ? "active" : "")} key={"cat" + cat.id} onClick={() => { filter(cat.id) }}>
-            <i className={"bi " + cat.icon}></i>
-            {cat.name}
-        </span>
+        <div className='categories'>
+            {categories &&
+                categories.map(cat => (
+                    <span className={(filtered.includes(cat.id) ? "active" : "")} key={"cat" + cat.id} onClick={() => { filter(cat.id) }}>
+                        <i className={"bi " + cat.icon}></i>
+                        {cat.name}
+                    </span>))
+            }
+        </div>
     )
 };
 
-const Head = ({data,query,count}) => {
-    const [categories, setCategories] = useState();
+let sortoptions = ["Relevance", "Alphabetic Order (A-Z)", "Stock Price (High to Low)"];
+const StocksPage = (props) => {
+    const { query, count } = props;
+    const [data, setData] = useState(props.data);
     const [activeSort, setActiveSort] = useState(1);
+    const [categories, setCategories] = useState();
     const [filtered, setFiltered] = useState([]);
 
+
     const order = (index) => {
+        setData(getsorted([...data], index));
+        setActiveSort(index);
+    }
+
+    const getsorted = (arr, index) => {
         switch (index) {
             case 1:
-                data.sort((a, b) => { return a.id > b.id });
+                arr.sort((a, b) => { return a.id > b.id });
                 break;
             case 2:
-                data.sort((a, b) => { return a.name > b.name });
+                arr.sort((a, b) => { return a.name > b.name });
                 break;
             case 3:
-                data.sort((a, b) => { return a.price < b.price });
+                arr.sort((a, b) => { return a.price < b.price });
                 break;
         }
-        setActiveSort(index);
+        return arr;
     }
 
     useEffect(() => {
@@ -43,39 +63,35 @@ const Head = ({data,query,count}) => {
             if (!d.pass) return;
             setCategories(d.data);
         })();
-    });
+    }, []);
 
-    const filter = (catid) => {
-        console.log(filteredvar);
-        if (filteredvar.includes(catid)) {
-            filteredvar = [...filtered];
-            filteredvar.unshift(catid);
-            setFiltered([]);
+    useEffect(() => {
+        if (filtered.length > 0) {
+            setData(getsorted(props.data.filter(val => { return filtered.includes(val.category) }), activeSort));
         } else {
-            filteredvar.push(catid);
-            setFiltered(items => [catid].concat(items));
+            setData(getsorted(props.data, activeSort));
         }
-        console.log(filtered);
-    }
+    }, [filtered]);
+
 
     return (
         <>
             <div className="stocks-title">
-                <h2>{(query ? count + ' Results for "' + decodeURI(query) + '"' : "All Stocks (" + count + ")")}</h2>
+                <h2>{(query ? data.length + ' Results for "' + decodeURI(query) + '"' : "All Stocks (" + data.length + ")")}</h2>
                 <Navbar bg="light">
                     <Container>
                         <Navbar.Toggle aria-controls="basic-navbar-nav" />
                         <Navbar.Collapse id="basic-navbar-nav">
                             <Nav className="me-auto">
-                                <NavDropdown title="Sort by" id="basic-nav-dropdown">
+                                <NavDropdown title={"Sort by " + sortoptions[activeSort - 1]} id="basic-nav-dropdown">
                                     <NavDropdown.Item onClick={() => { order(1) }} className={((activeSort === 1) ? "active" : "")}>
-                                        Relevance
+                                        {sortoptions[0]}
                                     </NavDropdown.Item>
                                     <NavDropdown.Item onClick={() => { order(2) }} className={((activeSort === 2) ? "active" : "")}>
-                                        Alphabetic Order (A-Z)
+                                        {sortoptions[1]}
                                     </NavDropdown.Item>
                                     <NavDropdown.Item onClick={() => { order(3) }} className={((activeSort === 3) ? "active" : "")}>
-                                        Stock Price (High to Low)
+                                        {sortoptions[2]}
                                     </NavDropdown.Item>
                                 </NavDropdown>
                             </Nav>
@@ -83,23 +99,10 @@ const Head = ({data,query,count}) => {
                     </Container>
                 </Navbar>
             </div>
-            <div className='categories'>
-                {categories &&
-                    categories.map(cat => (<Cat cat={cat} key={"cat" + cat.id} filter={filter} />))
-                }
-            </div>
-        </>
-    )
-}
+            <Categories categories={categories} filtered={filtered} setFiltered={setFiltered} />
 
-const StocksPage = (props) => {
-    const { query, count } = props;
-    const [data, setData] = useState(props.data);
-    
-    return (<>
-        <Head data={data} query={query} count={count} />
-        {data.map(stock => (<StockWidget stock={stock} key={"stock" + stock.id} />))}
-    </>)
+            {data.map(stock => (<StockWidget stock={stock} key={"stock" + stock.id} />))}
+        </>)
 }
 
 function Stocks(props) {
