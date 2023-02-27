@@ -198,7 +198,7 @@ const Login = ({ onLogout, isUserSignedIn, setIsUserSignedIn }) => {
             }
             {isUserSignedIn &&
                 <>
-                    <img src={profile} onClick={openMenu} />
+                    <img src={profile} onClick={openMenu} referrerPolicy="no-referrer" />
                     {showMenu && 
                     <div className="profile-menu">
                         <h2>Hello {name}</h2>

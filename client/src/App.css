@@ -1167,7 +1167,7 @@ body {
 }
 
 .stock.over {
-    opacity: 0.8;
+    background: #323853;
 }
 
 .dragrow, .dragrow .stock-widget { 
@@ -1178,10 +1178,11 @@ body {
     position: absolute;
     left: 0;
     width: calc(100% - 20px);
-
+    cursor: grab;
 }
 
 .dragrow .stock.removeanimation { 
     transition: none;
 }
+
 
