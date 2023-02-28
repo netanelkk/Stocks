@@ -52,8 +52,23 @@ router.get('/mysaved', passport.authenticate('jwt', { session: false }), functio
   db.Stock.mySaved(userId).then(rows => {
     res.json({ data: rows });
   }).catch(e => {
-    return res.status(400).json({ msg: e });
+    return res.status(400).json({ msg: "" });
   });
+});
+
+router.post('/reorder', passport.authenticate('jwt', { session: false }), async function (req, res) {
+  const userId = req.user.id;
+  try {
+    const neworder = req.body.neworder.split(',');
+    for (let i = 0; i < neworder.length; i++) {
+      await db.Stock.reorder(i, parseInt(neworder[i]), userId).catch(e => { 
+        return res.status(400).json({ msg: "" });
+      });
+    }
+    res.json({ result: "OK" });
+  } catch (e) {
+    return res.status(400).json({ msg: "" });
+  }
 });
 
 module.exports = router;

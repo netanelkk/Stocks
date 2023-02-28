@@ -176,10 +176,19 @@ Stock.mySaved = (userid) => {
                 JOIN stock S
                 ON SS.stockid = S.id
                 WHERE userid = ?
-                ORDER BY SS.order DESC`,[userid], (err, res) => {
+                ORDER BY SS.order ASC`,[userid], (err, res) => {
       if (err) { return reject(err); }
       if (res.length == 0) { return reject(); }
       return resolve(res);
+    });
+  });
+};
+
+Stock.reorder = (order,stockid,userid) => {
+  return new Promise((resolve, reject) => {
+    sql.query(`UPDATE saved_stocks SET \`order\`=? WHERE stockid=? AND userid=?`,[order,stockid,userid], (err, res) => {
+      if (err) { return reject(err); }
+      return resolve("OK");
     });
   });
 };

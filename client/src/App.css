@@ -950,7 +950,7 @@ body {
 
 .tagname {
     font-size: 8pt;
-    background: #0e101a;
+    background: #0e101a3d;
     margin: 0 20px 0 5px;
     text-align: center;
     border-radius: 100px;
@@ -1181,8 +1181,6 @@ body {
     cursor: grab;
 }
 
-.dragrow .stock.removeanimation { 
-    transition: none;
+#dragparent {
+    margin: 5px 0;
 }
-
-

@@ -95,3 +95,7 @@ export async function fetchCategories() {
 export async function mysaved() {
   return await request(API_URL + "/user/mysaved", "", "GET");
 }
+
+export async function reorder(neworder) {
+  return await request(API_URL + "/user/reorder", { neworder });
+}
