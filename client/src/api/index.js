@@ -107,3 +107,8 @@ export async function removesaved(id) {
 export async function addsaved(stockid) {
   return await request(API_URL + "/user/addsaved", { stockid });
 }
+
+export async function deleteaccount() {
+  return await request(API_URL + "/user/deleteaccount/", "", "DELETE");
+}
+

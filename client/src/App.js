@@ -7,6 +7,7 @@ import Menu from './components/header/menu';
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Top from './components/pages/top';
 import Saved from './components/pages/saved';
+import Account from './components/pages/account';
 
 // Bootstrap CSS
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -21,7 +22,7 @@ TimeAgo.addDefaultLocale(en);
 window.PATH = "";
 
 // list of pages with hidden menu
-const fullpages = ["stock","stocks"];
+const fullpages = ["stock","stocks","account"];
 
 const Pages = React.memo(({isUserSignedIn}) => {
   const { pathname } = useLocation();
@@ -42,6 +43,7 @@ const Pages = React.memo(({isUserSignedIn}) => {
           </Route>
           <Route path={window.PATH + "/top"} element={<Top topRef={topRef} isUserSignedIn={isUserSignedIn} />} />
           <Route path={window.PATH + "/saved"} element={<Saved topRef={topRef} isUserSignedIn={isUserSignedIn} />} />
+          <Route path={window.PATH + "/account"} element={<Account topRef={topRef} isUserSignedIn={isUserSignedIn} />} />
         </Routes>
       </div>
     </div>

@@ -130,7 +130,7 @@ const Search = () => {
 }
 
 const Login = ({ onLogout, isUserSignedIn, setIsUserSignedIn }) => {
-    const [profile, setProfile] = useState("https://cdn4.buysellads.net/uu/1/127419/1670532337-Stock2.jpg");
+    const [profile, setProfile] = useState(window.PATH + "/images/profile-blank.png");
     const [name, setName] = useState("");
     const [showMenu, setShowMenu] = useState(false);
 
@@ -203,7 +203,7 @@ const Login = ({ onLogout, isUserSignedIn, setIsUserSignedIn }) => {
                     <div className="profile-menu">
                         <h2>Hello {name}</h2>
                         <ul>
-                            <Link to={window.PATH + "/settings"} onClick={() => { setShowMenu(false); }}><li><i className="bi bi-gear"></i> Settings</li></Link>
+                            <Link to={window.PATH + "/account"} onClick={() => { setShowMenu(false); }}><li><i className="bi bi-person-circle"></i> Account</li></Link>
                             <Link to={window.PATH + "/#logout"} onClick={(e) => { e.preventDefault(); setShowMenu(false); onLogout(); }}><li><i className="bi bi-box-arrow-right"></i> Logout</li></Link>
                         </ul>
                     </div> }

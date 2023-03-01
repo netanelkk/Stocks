@@ -210,11 +210,11 @@ body {
 }
 
 .top-row .row-column:nth-child(1) .stock.top-stock {
-    background: linear-gradient(45deg,#222842,#caffbf);
+    background: linear-gradient(45deg, #222842, #caffbf);
 }
 
 .top-row .row-column:nth-child(2) .stock.top-stock {
-    background: linear-gradient(45deg,#222842,#e67070);
+    background: linear-gradient(45deg, #222842, #e67070);
 }
 
 .stock.top-stock .stock-price {
@@ -268,7 +268,8 @@ body {
 }
 
 .page-button,
-.userheader button {
+.userheader button,
+.userbox button {
     background: #1063e3;
     border: none;
     outline: none;
@@ -280,7 +281,17 @@ body {
     transition: background-color 0.1s linear;
 }
 
+.userbox button {
+    float: none;
+}
 
+.userbox button i {
+    padding-right: 5px;
+}
+
+.userbox button:hover {
+    background: #3b7ddf;
+}
 
 .page-button:hover {
     background: #3b7ddf;
@@ -908,13 +919,15 @@ body {
     width: 300px;
 }
 
-.profile-menu ul, .widget-menu ul {
+.profile-menu ul,
+.widget-menu ul {
     margin: 0;
     padding: 0;
 }
 
 
-.profile-menu ul li, .widget-menu ul li {
+.profile-menu ul li,
+.widget-menu ul li {
     list-style: none;
     text-align: left;
     padding: 15px;
@@ -932,7 +945,8 @@ body {
     background: none;
 }
 
-.profile-menu ul li i, .widget-menu ul li i {
+.profile-menu ul li i,
+.widget-menu ul li i {
     margin-right: 5px;
 }
 
@@ -1138,17 +1152,17 @@ body {
 }
 
 .top-row .row-column:nth-child(2) .top-title {
-    color:#ffd3d3;
+    color: #ffd3d3;
 }
 
 .top-title i {
     margin: 0 10px;
-    color:#caffbf;
+    color: #caffbf;
     font-size: 40pt;
 }
 
 .top-row .row-column:nth-child(2) .top-title i {
-    color:#e67070;
+    color: #e67070;
 }
 
 .categories {
@@ -1183,7 +1197,8 @@ body {
     background: #323853;
 }
 
-.dragrow, .dragrow .stock-widget { 
+.dragrow,
+.dragrow .stock-widget {
     position: relative;
 }
 
@@ -1196,4 +1211,44 @@ body {
 
 #dragparent {
     margin: 5px 0;
+}
+
+.accountpage {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.userbox {
+    background: #1b1e31;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 20px 30px #101320;
+    border-radius: 30px;
+    min-width: 400px;
+}
+
+.userbox img {
+    width: 96px;
+    height: 96px;
+    border-radius: 100%;
+    margin: 5px 0;
+}
+
+#boxname {
+    font-size: 50pt;
+    padding: 10px 0 0;
+    font-weight: bold;
+}
+
+#boxemail {
+    padding-bottom: 10px;
+    font-size: 14pt;
+    letter-spacing: 1.1px;
+}
+
+#boxdate {
+    font-size: 14pt;
+    padding-bottom: 50px;
 }

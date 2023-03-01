@@ -89,4 +89,11 @@ router.post('/addsaved', passport.authenticate('jwt', { session: false }), funct
   });
 });
 
+router.delete('/deleteaccount',passport.authenticate('jwt', { session: false }), function(req, res) {
+  db.User.deleteAccount(req.user.id).then(() => {
+    res.status(200).send({ status: "DELETED" });
+  }).catch(e => {
+      return res.status(400).json({ msg: "" });
+  });
+});
 module.exports = router;
