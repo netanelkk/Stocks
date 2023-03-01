@@ -99,3 +99,11 @@ export async function mysaved() {
 export async function reorder(neworder) {
   return await request(API_URL + "/user/reorder", { neworder });
 }
+
+export async function removesaved(id) {
+  return await request(API_URL + "/user/removesaved/"+id, "", "DELETE");
+}
+
+export async function addsaved(stockid) {
+  return await request(API_URL + "/user/addsaved", { stockid });
+}

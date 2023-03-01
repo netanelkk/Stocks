@@ -1,13 +1,18 @@
 var express = require('express');
 var router = express.Router();
 const db = require('../models/database');
+const passport = require('passport');
 
 router.get('/', function (req, res, next) {
-  db.Stock.fetch().then((rows) => {
-    res.json({ data: rows });
-  }).catch(e => {
-    return res.status(400).json({ msg: e });
-  });
+  passport.authenticate('jwt', { session: false }, function (err, user) {
+    let userid = null;
+    if (!err && user) userid = user.id;
+    db.Stock.fetch(userid).then((rows) => {
+      res.json({ data: rows });
+    }).catch(e => {
+      return res.status(400).json({ msg: "" });
+    });
+  })(req, res);
 });
 
 router.get('/articles', function (req, res, next) {
@@ -19,11 +24,15 @@ router.get('/articles', function (req, res, next) {
 });
 
 router.get('/stocks', function (req, res, next) {
-  fetch().then(result => {
-    res.json({ data: result });
-  }).catch(e => {
-    return res.status(400).json({ msg: "" });
-  });
+  passport.authenticate('jwt', { session: false }, function (err, user) {
+    let userid = null;
+    if (!err && user) userid = user.id;
+    fetch(userid).then(result => {
+      res.json({ data: result });
+    }).catch(e => {
+      return res.status(400).json({ msg: "" });
+    });
+  })(req, res);
 });
 
 router.get('/categories', function (req, res, next) {
@@ -37,21 +46,25 @@ router.get('/categories', function (req, res, next) {
 
 router.get('/stocks/:query', function (req, res, next) {
   const { query } = req.params;
-  fetch(query).then(result => {
-    res.json({ data: result });
-  }).catch(e => {
-    return res.status(400).json({ msg: "" });
-  });
+  passport.authenticate('jwt', { session: false }, function (err, user) {
+    let userid = null;
+    if (!err && user) userid = user.id;
+    fetch(userid, query).then(result => {
+      res.json({ data: result });
+    }).catch(e => {
+      return res.status(400).json({ msg: "" });
+    });
+  })(req, res);
 });
 
 
 
-const fetch = (query="",limit=100) => {
+const fetch = (userid = null, query = "", limit = 100) => {
   return new Promise((resolve, reject) => {
-    db.Stock.fetch(query,limit).then(result => {
+    db.Stock.fetch(userid, query, limit).then(result => {
       resolve(result);
     }).catch(e => {
-      return reject(); 
+      return reject();
     });
   });
 }

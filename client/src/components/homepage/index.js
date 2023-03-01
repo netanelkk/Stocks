@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { StockWidget } from '../stock/widget';
-import { fetchHome, fetchArticles } from '../../api';
+import { fetchHome, fetchArticles, addsaved } from '../../api';
 import Async from "react-async";
 import { Link } from "react-router-dom";
 import { Carousel } from "./carousel";
@@ -22,6 +22,7 @@ const Article = ({ data }) => {
 
 function Homepage() {
     const [homeStocks, setHomeStocks] = useState(null);
+
     useEffect(() => {
         (async () => {
             const d = await fetchHome();
@@ -61,7 +62,9 @@ function Homepage() {
                 <div style={{ clear: "both" }}></div>
                 <div className="row">
                     {homeStocks &&
-                        homeStocks.map(stock => (<StockWidget stock={stock} key={"stock" + stock.id} />))}
+                        homeStocks.map(stock => (
+                            <StockWidget stock={stock} key={"stock" + stock.id} optionClick={() => {}} />
+                        ))}
                 </div>
 
                 <ul className="carousel-nav">

@@ -216,9 +216,7 @@ function Header({ onLogout, isUserSignedIn, setIsUserSignedIn }) {
     return (
         <div className="header">
             <Link to={window.PATH}>
-                <div className="logo">
-                    <i className="bi bi-graph-up"></i> Stocks
-                </div>
+                <div className="logo"></div>
             </Link>
             <Search />
             <Login setIsUserSignedIn={setIsUserSignedIn} isUserSignedIn={isUserSignedIn} onLogout={onLogout} />

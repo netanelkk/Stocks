@@ -9,10 +9,13 @@ Stock.select_calculated = `TRUNCATE((@preprice:=COALESCE((SELECT close FROM stoc
                            TRUNCATE(COALESCE((@diff:=@price-@preprice)),3) as stock_difference,
                            TRUNCATE(COALESCE((@price-@preprice)/@preprice*100,0),3) as stock_difference_percentage`;
 
-Stock.fetch = (query=null,limit=16) => {
+Stock.fetch = (userid=null,query=null,limit=16) => {
   return new Promise((resolve, reject) => {
-    sql.query(`SELECT *,` + Stock.select_calculated + `
-              FROM stock S ` +
+    sql.query(`SELECT S.*,` + Stock.select_calculated + 
+              ((userid) ? ", SS.userid saved " : "")
+              + ` FROM stock S ` +
+              ((userid) ? `LEFT JOIN saved_stocks SS
+                           ON S.id = SS.stockid AND SS.userid = `+userid : "") +
               ((query) ? ` WHERE S.name LIKE ? OR S.symbol LIKE ? OR S.about LIKE ? ` : ``)
              + ` ORDER BY S.id LIMIT `+limit,['%'+query+'%','%'+query+'%','%'+query+'%'], (err, res) => {
       if (err) { return reject(err); }
@@ -171,7 +174,7 @@ Stock.allCategories = () => {
 
 Stock.mySaved = (userid) => {
   return new Promise((resolve, reject) => {
-    sql.query(`SELECT *,` + Stock.select_calculated + `
+    sql.query(`SELECT *,` + Stock.select_calculated + `, 1 as saved
                 FROM saved_stocks SS
                 JOIN stock S
                 ON SS.stockid = S.id
@@ -187,6 +190,24 @@ Stock.mySaved = (userid) => {
 Stock.reorder = (order,stockid,userid) => {
   return new Promise((resolve, reject) => {
     sql.query(`UPDATE saved_stocks SET \`order\`=? WHERE stockid=? AND userid=?`,[order,stockid,userid], (err, res) => {
+      if (err) { return reject(err); }
+      return resolve("OK");
+    });
+  });
+};
+
+Stock.removeFromSaved = (stockid,userid) => {
+  return new Promise((resolve, reject) => {
+    sql.query(`DELETE FROM saved_stocks WHERE stockid = ? and userid = ?`,[stockid,userid], (err, res) => {
+      if (err) { return reject(err); }
+      return resolve("OK");
+    });
+  });
+};
+
+Stock.addSaved = (stockid,userid) => {
+  return new Promise((resolve, reject) => {
+    sql.query(`INSERT INTO saved_stocks (stockid,userid) VALUES(?,?)`,[stockid,userid], (err, res) => {
       if (err) { return reject(err); }
       return resolve("OK");
     });

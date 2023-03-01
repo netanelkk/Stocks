@@ -39,6 +39,9 @@ body {
 }
 
 .logo {
+    background: url("../public/images/logo.png") no-repeat;
+    width: 220px;
+    height: 70px;
     font-size: 28pt;
     font-weight: bold;
     cursor: pointer;
@@ -879,12 +882,12 @@ body {
 }
 
 .profile-menu,
-.dropdown-menu {
+.dropdown-menu,
+.widget-menu {
     background: #0a0c1a;
     position: absolute;
     padding: 10px 15px;
     margin-top: 10px;
-    width: 200px;
     right: 30px;
     border-radius: 10px;
     box-shadow: 0 15px 30px black;
@@ -893,25 +896,35 @@ body {
     z-index: 101;
 }
 
+.profile-menu {
+    width: 200px;
+}
+
+.widget-menu {
+    right: 10px;
+}
+
 .dropdown-menu {
     width: 300px;
 }
 
-.profile-menu ul {
+.profile-menu ul, .widget-menu ul {
     margin: 0;
     padding: 0;
 }
 
 
-.profile-menu ul li {
+.profile-menu ul li, .widget-menu ul li {
     list-style: none;
     text-align: left;
     padding: 15px;
     color: white;
     transition: color 0.2s ease;
+    cursor: pointer;
 }
 
 .profile-menu ul li:hover,
+.widget-menu ul li:hover,
 .dropdown-item:focus,
 .dropdown-item:hover,
 .dropdown-item.active {
@@ -919,7 +932,7 @@ body {
     background: none;
 }
 
-.profile-menu ul li i {
+.profile-menu ul li i, .widget-menu ul li i {
     margin-right: 5px;
 }
 

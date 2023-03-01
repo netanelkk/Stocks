@@ -5,18 +5,18 @@ Sort.indexmap = [];
 Sort.stockmap = [];
 Sort.reorder = null;
 
-Sort.initarr = (cells) => {
-    for(let i = 0; i < cells; i++) {
+Sort.init = (cells, stockmap, reorder) => {
+    for (let i = 0; i < cells; i++) {
         Sort.indexmap.push(i);
     }
-    console.log(Sort.indexmap);
-    console.log(Sort.stockmap);
+    Sort.stockmap = stockmap;
+    Sort.reorder = reorder;
 }
 
 Sort.dragenter = () => {
     document.getElementById("widget" + currentdrag).classList.add("over");
 }
-
+ 
 Sort.dragover = async (e, i) => {
     e.preventDefault();
     if (i != currentdrag) {
@@ -72,11 +72,18 @@ Sort.dragover = async (e, i) => {
 
 Sort.dragend = () => {
     document.getElementById("widget" + currentdrag).classList.remove("over");
-    if(Sort.reorder)
+    if (Sort.reorder)
         Sort.reorder(Sort.stockmap.join())
 }
 
 Sort.dragstart = (i) => {
     currentdrag = i;
     document.getElementById("widget" + currentdrag).classList.add("over");
+}
+
+Sort.kill = () => {
+    currentdrag = 0;
+    Sort.indexmap = [];
+    Sort.stockmap = [];
+    Sort.reorder = null;
 }

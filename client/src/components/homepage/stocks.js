@@ -101,7 +101,7 @@ const StocksPage = (props) => {
             </div>
             <Categories categories={categories} filtered={filtered} setFiltered={setFiltered} />
 
-            {data.map(stock => (<StockWidget stock={stock} key={"stock" + stock.id} />))}
+            {data.map(stock => (<StockWidget stock={stock} key={"stock" + stock.id} optionClick={() => {}} />))}
         </>)
 }
 

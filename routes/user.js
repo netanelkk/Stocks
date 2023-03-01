@@ -60,15 +60,33 @@ router.post('/reorder', passport.authenticate('jwt', { session: false }), async 
   const userId = req.user.id;
   try {
     const neworder = req.body.neworder.split(',');
+    console.log(neworder);
     for (let i = 0; i < neworder.length; i++) {
       await db.Stock.reorder(i, parseInt(neworder[i]), userId).catch(e => { 
-        return res.status(400).json({ msg: "" });
+        console.log(e);
+        //return res.status(400).json({ msg: "" });
       });
     }
     res.json({ result: "OK" });
   } catch (e) {
     return res.status(400).json({ msg: "" });
   }
+});
+
+router.delete('/removesaved/:stockid',passport.authenticate('jwt', { session: false }), function(req, res) {
+  db.Stock.removeFromSaved(req.params.stockid, req.user.id).then(() => {
+    res.status(200).send({ status: "DELETED" });
+  }).catch(e => {
+      return res.status(400).json({ msg: "" });
+  });
+});
+
+router.post('/addsaved', passport.authenticate('jwt', { session: false }), function (req, res) {
+  db.Stock.addSaved(req.body.stockid, req.user.id).then(() => {
+    res.status(200).send({ status: "OK" });
+  }).catch(e => {
+      return res.status(400).json({ msg: "" });
+  });
 });
 
 module.exports = router;
