@@ -46,17 +46,17 @@ Stock.insertStockData = (d) => {
 };
 
 
-Stock.fetchBySymbol = (symbol) => {
+Stock.fetchBySymbol = (symbol,userid) => {
   return new Promise((resolve, reject) => {
     sql.query(`SELECT S.*,
                 ` + Stock.select_calculated + `,
-                COALESCE(SD.open,0) open, COALESCE(SD.close,0) close, COALESCE(SD.high,0) high, COALESCE(SD.low,0) low,
-                COALESCE(SP.open,0) predopen, COALESCE(SP.close,0) predclose, COALESCE(SP.high,0) predhigh, COALESCE(SP.low,0) predlow
-               FROM stock S
-               LEFT JOIN stock_data SD
+                COALESCE(SD.open,0) open, COALESCE(SD.close,0) close, COALESCE(SD.high,0) high, COALESCE(SD.low,0) low`+
+                ((userid) ? ", SS.userid saved " : "") 
+                +` FROM stock S `+
+                ((userid) ? ` LEFT JOIN saved_stocks SS
+                ON S.id = SS.stockid AND SS.userid = `+userid : "") +
+               ` LEFT JOIN stock_data SD
                ON S.id = SD.stockid
-               LEFT JOIN stock_prediction SP
-               ON S.id = SP.stockid
                WHERE S.symbol = ?
                ORDER BY SD.date DESC LIMIT 1`, [symbol], (err, res) => {
       if (err) { return reject(err); }
@@ -70,17 +70,13 @@ Stock.stockData = (stockid,range) => {
   return new Promise((resolve, reject) => {
     sql.query(`SELECT *
                FROM ((SELECT SD.open, SD.high, SD.low, SD.close,
-                        COALESCE(SP.open,0) predopen, COALESCE(SP.high,0) predhigh, 
-                        COALESCE(SP.low,0) predlow, COALESCE(SP.close,0) predclose, 
-                        SP.stockid stockid, SP.date
+                        SP.prediction, SP.stockid stockid, SP.date
                       FROM stock_data SD
                       RIGHT JOIN stock_prediction SP
                       ON SD.stockid = SP.stockid AND SD.date = SP.date)
               UNION
                     (SELECT SD.open, SD.high, SD.low, SD.close,
-                      COALESCE(SP.open,0) predopen, COALESCE(SP.high,0) predhigh, 
-                      COALESCE(SP.low,0) predlow, COALESCE(SP.close,0) predclose, 
-                      SD.stockid stockid, SD.date
+                      SP.prediction, SD.stockid stockid, SD.date
                     FROM stock_data SD
                     LEFT JOIN stock_prediction SP
                     ON SD.stockid = SP.stockid AND SD.date = SP.date)) t
@@ -93,11 +89,14 @@ Stock.stockData = (stockid,range) => {
   });
 };
 
-Stock.fetchSuggestion = (ignoresymbol) => {
+Stock.fetchSuggestion = (ignoresymbol,userid=null) => {
   return new Promise((resolve, reject) => {
-    sql.query(`SELECT *,` + Stock.select_calculated + `
-              FROM stock S
-              WHERE symbol != ? ORDER BY RAND() LIMIT 4`, [ignoresymbol], (err, res) => {
+    sql.query(`SELECT S.*,` + Stock.select_calculated +
+              ((userid) ? ", SS.userid saved " : "") 
+              +` FROM stock S `+
+              ((userid) ? ` LEFT JOIN saved_stocks SS
+              ON S.id = SS.stockid AND SS.userid = `+userid : "") +
+              ` WHERE symbol != ? ORDER BY RAND() LIMIT 4`, [ignoresymbol], (err, res) => {
       if (err) { return reject(err); }
       if (res.length == 0) { return reject(); }
       return resolve(res);

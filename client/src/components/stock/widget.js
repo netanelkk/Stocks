@@ -19,7 +19,7 @@ export default function StockWidget(props) {
     }
 
     return (
-        <div className={"stock-widget" + (isColumn ? "" : " col-lg-3")} id={"drag" + i}>
+        <div className={"stock-widget" + (isColumn ? "" : " col-lg-3")} id={i ? "drag" + i : ""}>
             <Link to={window.PATH + "/stock/" + stock.symbol} draggable="false">
                 <div className={"stock" + (i === 0 && isColumn ? " top-stock" : "")} draggable="true" id={"widget" + i}
                     onDragStart={() => { if (Sort) { Sort.dragstart(i) } }}
@@ -27,7 +27,7 @@ export default function StockWidget(props) {
                     onDragOver={e => ((Sort && Sort.dragover(e, i)))}
                     onDragEnd={() => { if (Sort) { Sort.dragend() } }}>
 
-                    {stock.saved !== undefined &&
+                    {(stock.saved !== undefined && optionClick) &&
                         <div className="stock-option" onClick={e => menuOptionClick(e) }>
                             {!add ? <i className="bi bi-bookmark"></i> : <i className="bi bi-bookmark-fill"></i>}
                         </div>

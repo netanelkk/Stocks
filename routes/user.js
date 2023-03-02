@@ -85,6 +85,7 @@ router.post('/addsaved', passport.authenticate('jwt', { session: false }), funct
   db.Stock.addSaved(req.body.stockid, req.user.id).then(() => {
     res.status(200).send({ status: "OK" });
   }).catch(e => {
+    console.log(e);
       return res.status(400).json({ msg: "" });
   });
 });

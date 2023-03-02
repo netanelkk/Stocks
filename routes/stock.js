@@ -17,11 +17,15 @@ router.get('/suggestion/:query', function (req, res, next) {
 
 router.get('/suggestions/:ignoresymbol', function (req, res, next) {
   const { ignoresymbol } = req.params;
-  db.Stock.fetchSuggestion(ignoresymbol).then((rows) => {
-    res.json({ data: rows });
-  }).catch(e => {
-    return res.status(400).json({ msg: "" });
-  });
+  passport.authenticate('jwt', { session: false }, function (err, user) {
+    let userid = null;
+    if (!err && user) userid = user.id;
+    db.Stock.fetchSuggestion(ignoresymbol, userid).then((rows) => {
+      res.json({ data: rows });
+    }).catch(e => {
+      return res.status(400).json({ msg: "" });
+    });
+  })(req, res);
 });
 
 router.post('/addcomment/:stockid', [
@@ -35,22 +39,25 @@ router.post('/addcomment/:stockid', [
   });
 });
 
-router.delete('/deletecomment/:commentid',passport.authenticate('jwt', { session: false }), function(req, res) {
+router.delete('/deletecomment/:commentid', passport.authenticate('jwt', { session: false }), function (req, res) {
   db.Stock.deleteComment(req.params.commentid, req.user.id).then(result => {
     res.status(200).send({ status: "DELETED" });
   }).catch(e => {
-      return res.status(400).json({ msg: "" });
+    return res.status(400).json({ msg: "" });
   });
 });
 
 router.get('/:symbol', function (req, res, next) {
   const { symbol } = req.params;
-  db.Stock.fetchBySymbol(symbol).then(result => {
-    res.json({ data: result });
-  }).catch(e => {
-    console.log(e);
-    return res.status(400).json({ msg: "" });
-  });
+  passport.authenticate('jwt', { session: false }, function (err, user) {
+    let userid = null;
+    if (!err && user) userid = user.id;
+    db.Stock.fetchBySymbol(symbol, userid).then(result => {
+      res.json({ data: result });
+    }).catch(e => {
+      return res.status(400).json({ msg: "" });
+    });
+  })(req, res);
 });
 
 router.get('/:stockid/graph/:range', function (req, res, next) {
@@ -65,16 +72,16 @@ router.get('/:stockid/graph/:range', function (req, res, next) {
 
 });
 
-router.get('/:id/comments/:page', function(req, res) {
+router.get('/:id/comments/:page', function (req, res) {
   const { id, page } = req.params;
   db.Stock.fetchComments(id, Number(page)).then(async (rows) => {
-      db.Stock.countComments(id).then(count => {
-        res.json({ data: rows, count });
-      }).catch(e => {
-        return res.status(400).json({ msg: "" });
-      });
-  }).catch(e => {
+    db.Stock.countComments(id).then(count => {
+      res.json({ data: rows, count });
+    }).catch(e => {
       return res.status(400).json({ msg: "" });
+    });
+  }).catch(e => {
+    return res.status(400).json({ msg: "" });
   });
 });
 

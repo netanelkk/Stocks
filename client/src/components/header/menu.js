@@ -36,10 +36,12 @@ function Menu() {
                     <div>SAVED</div>
                 </li>
                 </Link>
-                <li>
+                <Link to={window.PATH + "/analyse"}>
+                <li className={(path==="analyse") ? "active" : ""}>
                     <i className="bi bi-clipboard-data"></i>
-                    <div>STATISTICS</div>
+                    <div>ANALYSE</div>
                 </li>
+                </Link>
             </ul>
         </div>
     );

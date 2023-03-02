@@ -1,15 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams } from "react-router-dom";
-import { fetchBySymbol, fetchSuggestions, fetchGraph, addComment, fetchComments, deletecomment } from '../../api';
+import { fetchBySymbol, fetchSuggestions, fetchGraph, addComment, fetchComments, deletecomment, removesaved, addsaved } from '../../api';
 import { graph } from './graph';
 import ReactTooltip from 'react-tooltip';
 import { StockWidget } from '../stock/widget';
 import Async from "react-async";
 import ReactTimeAgo from 'react-time-ago'
-
-function round3digits(x) {
-    return Math.round(x * 1000) / 1000;
-}
 
 const Graph = ({ stockid }) => {
     const graphRef = useRef(null);
@@ -36,7 +32,16 @@ const Graph = ({ stockid }) => {
                     document.getElementById("point" + i).style.left = (graphDots[i - 1].x - 20) + "px";
                     document.getElementById("point" + i).style.top = (graphDots[i - 1].y) + "px";
                     document.getElementById("point" + i).style.display = "block";
-                    document.getElementById("point" + i).setAttribute("data-tip", graphDots[i - 1].val + " $");
+
+                    document.getElementById("point" + i).classList.remove("raise");
+                    document.getElementById("point" + i).classList.remove("fall");
+                    if (graphDots[i - 1].pred > 0) {
+                        document.getElementById("point" + i).classList.add("raise");
+                    } else if (graphDots[i - 1].pred < 0) {
+                        document.getElementById("point" + i).classList.add("fall");
+                    }
+
+                    document.getElementById("point" + i).setAttribute("data-tip", graphDots[i - 1].val + (!isNaN(graphDots[i - 1].val) ? " $" : ""));
                 }
                 ReactTooltip.rebuild();
             }
@@ -57,13 +62,10 @@ const Graph = ({ stockid }) => {
                 graphdata.data.push(stockdata[i].close);
             }
 
-            graphdata.pred.push(stockdata[i].predclose);
+            graphdata.pred.push(stockdata[i].prediction);
             graphdata.dates.push(stockdata[i].date);
 
             dotselements.push(<div className='point-space' id={"point" + (i + 1)} key={"point" + (i + 1)}>
-                <div className='point'></div>
-            </div>);
-            dotselements.push(<div className='point-space' id={"point" + (stockdata.length + i + 1)} key={"point" + (stockdata.length + i + 1)}>
                 <div className='point'></div>
             </div>);
         }
@@ -74,13 +76,18 @@ const Graph = ({ stockid }) => {
         <>
             <div className="graph-menu">
                 <div className="graph-hint">
+                    <span>Predicted:</span>
                     <div className="hint">
-                        <div id="actual-line"></div>
-                        <span>ACTUAL</span>
+                        <div className='raise' id="guidepoint"></div>
+                        <span>RAISE</span>
                     </div>
                     <div className="hint">
-                        <div id="predicted-line"></div>
-                        <span>PREDICTED</span>
+                        <div className='fall' id="guidepoint"></div>
+                        <span>FALL</span>
+                    </div>
+                    <div className="hint">
+                        <div id="guidepoint"></div>
+                        <span>NO INFO</span>
                     </div>
                 </div>
                 <ul>
@@ -94,6 +101,7 @@ const Graph = ({ stockid }) => {
                 <div className="graph-dots">
                     {dots}
                 </div>
+                {!dots ? <div className='loading-large' style={{position:"absolute",right: 0,left: 0}}></div> : "" }
                 <canvas width="0" height="300" ref={graphRef}></canvas>
             </div>
         </>
@@ -101,6 +109,28 @@ const Graph = ({ stockid }) => {
 }
 
 const StockElements = ({ data }) => {
+    const [add, setAdd] = useState(data.saved);
+
+    const menuOptionClick = async (e) => {
+        e.preventDefault();
+
+        let d = (!add ? await addsaved(data.id) : await removesaved(data.id));
+        if (d.pass) {
+            setAdd(val => !val);
+        } else {
+            alert("error");
+        }
+    }
+
+    useEffect(() => {
+        if (data.saved) {
+            document.getElementsByClassName("stock-saved")[0].style.display = "none";
+            setTimeout(() => {
+                document.getElementsByClassName("stock-saved")[0].style.display = "block";
+                ReactTooltip.rebuild();
+            }, 10);
+        }
+    }, [add]);
 
     return (
         <>
@@ -111,7 +141,17 @@ const StockElements = ({ data }) => {
                     </div>
                 </div>
                 <h1>{data.name + " (" + data.symbol + ")"}</h1>
-                <div>
+
+                {data.saved !== undefined &&
+                    <div className="stock-box">
+                        <div className='stock-saved' onClick={e => menuOptionClick(e)}
+                            data-tip={!add ? "Add to saved" : "Remove from saved"}>
+                            {!add ? <i className="bi bi-bookmark"></i> : <i className="bi bi-bookmark-fill"></i>}
+                        </div>
+                    </div>
+                }
+
+                <div className="stock-box">
                     <span className="stock-price">{"$" + data.close}</span>
                     <div className={"stock-info " + ((data.stock_difference < 0) ? "negative" : "positive")}>
                         <span>{data.stock_difference}</span>
@@ -127,38 +167,30 @@ const StockElements = ({ data }) => {
             <div className="row" id="detailsrow">
                 <div className="col-lg-6">
                     <div className="detailblock">
-                        <h2>Stock Details</h2>
+                        <h2>Today's Oscillator</h2>
                         <table>
                             <thead>
                                 <tr>
-                                    <td></td>
-                                    <td>Open</td>
-                                    <td>High</td>
-                                    <td>Low</td>
-                                    <td>Close</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Actual</td>
                                     <td>${data.open}</td>
                                     <td>${data.high}</td>
                                     <td>${data.low}</td>
                                     <td>${data.close}</td>
                                 </tr>
+
+                            </thead>
+                            <tbody>
                                 <tr>
-                                    <td>Predicated</td>
-                                    <td>${data.predopen}</td>
-                                    <td>${data.predhigh}</td>
-                                    <td>${data.predlow}</td>
-                                    <td>${data.predclose}</td>
+                                    <td>Open</td>
+                                    <td>High</td>
+                                    <td>Low</td>
+                                    <td>Close</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
                 <div className="col-lg-6">
-                    <div className="detailblock">
+                    <div className="detailblock" id="stockdetail">
                         <h2>About {data.name}</h2>
                         <p>
                             {data.about}
@@ -385,24 +417,30 @@ function Stock(props) {
             <ReactTooltip />
             <Async promiseFn={getData}>
                 {({ data, error, isPending }) => {
-                    if (isPending) return (<>Loading..</>);
-                    if (error) return (<>error</>);
+                    if (isPending) return (<div className='loading-large' style={{height:"200px"}}></div>);
+                    if (error) return (<div id="notice">
+                        <i className="bi bi-exclamation-circle"></i>
+                        <p>
+                            <h3>Couldn't obtain page</h3>
+                            <p>Try again later. if you encounter this problem again, check the URL spelled correctly.</p>
+                        </p>
+                    </div>);
                     if (data) {
                         return (<>
                             <StockElements data={data} />
 
                             <Discussion isUserSignedIn={isUserSignedIn} stockid={data.id} />
-
+                            
+                            <h1 id="seealso">See Also</h1>
                             <Async promiseFn={getSuggestions}>
                                 {({ data, error, isPending }) => {
-                                    if (isPending) return (<>Loading..</>);
+                                    if (isPending) return (<div className='loading-sug'></div>);
                                     if (error) return (<>error</>);
                                     if (data) {
                                         return (
                                             <>
-                                                <h1 id="seealso">See Also</h1>
                                                 <div className="row">
-                                                    {data.map(stock => (<StockWidget stock={stock} key={"suggestion" + stock.id} />))}
+                                                    {data.map(stock => (<StockWidget stock={stock} key={"suggestion" + stock.id} optionClick={() => { }} />))}
                                                 </div>
                                             </>
                                         )

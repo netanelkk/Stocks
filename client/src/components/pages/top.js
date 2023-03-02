@@ -42,6 +42,7 @@ function Top(props) {
                         <div>Percentage</div>
                     </div>
                     {topPercentage && topPercentage.map((stock,i) => (<StockWidget i={i} stock={stock} key={"stock" + stock.id} isColumn={true} />))}
+                    {!topPercentage && <div className='loading-large' style={{height:"400px"}}></div>}
                 </div>
                 <div className="row-column">
                     <div className="top-title">
@@ -49,6 +50,7 @@ function Top(props) {
                         <div>Percentage</div>
                     </div>
                     {lowPercentage && lowPercentage.map((stock,i) => (<StockWidget i={i} stock={stock} key={"stock" + stock.id} isColumn={true} />))}
+                    {!lowPercentage && <div className='loading-large' style={{height:"400px"}}></div>}
                 </div>
             </div>
 
@@ -59,6 +61,7 @@ function Top(props) {
                         <div>Price Difference</div>
                     </div>
                     {topDifference && topDifference.map((stock,i) => (<StockWidget i={i} stock={stock} key={"stock" + stock.id} isColumn={true} />))}
+                    {!topDifference && <div className='loading-large' style={{height:"400px"}}></div>}
                 </div>
                 <div className="row-column">
                     <div className="top-title">
@@ -66,6 +69,7 @@ function Top(props) {
                         <div>Price Difference</div>
                     </div>
                     {lowDifference && lowDifference.map((stock,i) => (<StockWidget i={i} stock={stock} key={"stock" + stock.id} isColumn={true} />))}
+                    {!lowDifference && <div className='loading-large' style={{height:"400px"}}></div>}
                 </div>
             </div>
         </>

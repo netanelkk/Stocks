@@ -101,7 +101,7 @@ const StocksPage = (props) => {
             </div>
             <Categories categories={categories} filtered={filtered} setFiltered={setFiltered} />
 
-            {data.map(stock => (<StockWidget stock={stock} key={"stock" + stock.id} optionClick={() => {}} />))}
+            {data.map(stock => (<StockWidget stock={stock} key={"stock" + stock.id} optionClick={() => { }} />))}
         </>)
 }
 
@@ -128,7 +128,14 @@ function Stocks(props) {
                 <Async promiseFn={getData}>
                     {({ data, error, isPending }) => {
                         if (isPending) return (<>Loading..</>);
-                        if (error) return (<>No results</>);
+                        if (error) return (
+                            <>
+                                <div className="stocks-title">
+                                    <h2>0 Results</h2>
+                                </div>
+                                <div id="notice"><i className="bi bi-exclamation-circle"></i> No results found</div>
+                            </>
+                        );
                         if (data) {
                             return (
                                 <StocksPage data={data} count={count} query={query} />

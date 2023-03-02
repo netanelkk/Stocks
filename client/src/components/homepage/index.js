@@ -51,46 +51,48 @@ function Homepage() {
 
     return (
         <>
-            <div className="carousel" onMouseEnter={Carousel.pause} onMouseLeave={Carousel.play}>
-                <div className="control">
-                    <div className='arrow-left' onClick={() => { Carousel.intervalfun(true); }}><i className="bi bi-chevron-left"></i></div>
-                    <div className='progress-container'>
-                        <div className='carousel-progress'></div>
+            {homeStocks && <>
+                <div className="carousel" onMouseEnter={Carousel.pause} onMouseLeave={Carousel.play}>
+                    <div className="control">
+                        <div className='arrow-left' onClick={() => { Carousel.intervalfun(true); }}><i className="bi bi-chevron-left"></i></div>
+                        <div className='progress-container'>
+                            <div className='carousel-progress'></div>
+                        </div>
+                        <div className='arrow-right' onClick={() => { Carousel.intervalfun(); }}><i className="bi bi-chevron-right"></i></div>
                     </div>
-                    <div className='arrow-right' onClick={() => { Carousel.intervalfun(); }}><i className="bi bi-chevron-right"></i></div>
-                </div>
-                <div style={{ clear: "both" }}></div>
-                <div className="row">
-                    {homeStocks &&
-                        homeStocks.map(stock => (
-                            <StockWidget stock={stock} key={"stock" + stock.id} optionClick={() => {}} />
-                        ))}
-                </div>
+                    <div style={{ clear: "both" }}></div>
+                    <div className="row">
+                        {
+                            homeStocks.map(stock => (
+                                <StockWidget stock={stock} key={"stock" + stock.id} optionClick={() => { }} />
+                            ))}
+                    </div>
 
-                <ul className="carousel-nav">
-                    <li className='active' onClick={() => { Carousel.navClick(1); }}></li>
-                    <li onClick={() => { Carousel.navClick(2); }}></li>
-                    <li onClick={() => { Carousel.navClick(3); }}></li>
-                    <li onClick={() => { Carousel.navClick(4); }}></li>
-                </ul>
-            </div>
-            <div className='button-row'>
-                <Link to={window.PATH + "/stocks"} className="expand-button">
-                    View All
-                </Link>
-            </div>
-
+                    <ul className="carousel-nav">
+                        <li className='active' onClick={() => { Carousel.navClick(1); }}></li>
+                        <li onClick={() => { Carousel.navClick(2); }}></li>
+                        <li onClick={() => { Carousel.navClick(3); }}></li>
+                        <li onClick={() => { Carousel.navClick(4); }}></li>
+                    </ul>
+                </div>
+                <div className='button-row'>
+                    <Link to={window.PATH + "/stocks"} className="expand-button">
+                        View All
+                    </Link>
+                </div></>}
+            {!homeStocks && <div className="loading-large"></div>}
             <h1>Recent News</h1>
             <div className="row articles">
+            {homeStocks &&
                 <Async promiseFn={getArticles}>
                     {({ data, error, isPending }) => {
-                        if (isPending) return (<>Loading..</>);
-                        if (error) return (<>error</>);
+                        if (isPending) return (<div className='loading-large' style={{height:"400px"}}></div>);
+                        if (error) return (<div id="notice"><i className="bi bi-exclamation-circle"></i> Couldn't load news</div>);
                         if (data) {
                             return data.map(article => (<Article data={article} key={"article" + article.id} />));
                         }
                     }}
-                </Async>
+                </Async>}
             </div>
         </>
     );

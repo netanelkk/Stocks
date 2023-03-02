@@ -8,6 +8,8 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Top from './components/pages/top';
 import Saved from './components/pages/saved';
 import Account from './components/pages/account';
+import Analyse from './components/pages/analyse';
+import Error404 from './components/pages/error404'
 
 // Bootstrap CSS
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -44,6 +46,8 @@ const Pages = React.memo(({isUserSignedIn}) => {
           <Route path={window.PATH + "/top"} element={<Top topRef={topRef} isUserSignedIn={isUserSignedIn} />} />
           <Route path={window.PATH + "/saved"} element={<Saved topRef={topRef} isUserSignedIn={isUserSignedIn} />} />
           <Route path={window.PATH + "/account"} element={<Account topRef={topRef} isUserSignedIn={isUserSignedIn} />} />
+          <Route path={window.PATH + "/analyse"} element={<Analyse topRef={topRef} isUserSignedIn={isUserSignedIn} />} />
+          <Route path="*" element={<Error404 />} />
         </Routes>
       </div>
     </div>

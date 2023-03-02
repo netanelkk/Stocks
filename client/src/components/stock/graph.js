@@ -18,7 +18,7 @@ export function graph(c, data, pred, dates) {
     }
 
     // find max numberic value in data
-    var max = Math.ceil(Math.max(...maxdata,...pred) / 50) * 50;
+    var max = Math.ceil(Math.max(...maxdata) / 50) * 50;
     max = (max === 0) ? 50 : max;
 
     dimenstion.width = document.getElementById("graph").offsetWidth;
@@ -65,16 +65,22 @@ export function graph(c, data, pred, dates) {
     ctx.stroke();
 
     if(data.length>0) {
-        drawLine(baroffset,data,max,graphwidth,barwidth);
-        drawLine(baroffset,pred,max,graphwidth,barwidth,true);
+        drawLine(baroffset,data,max,graphwidth,barwidth,pred);
     }
+
+    if(pred.length > data.length) {
+        const xposition = barwidth * (dates.length-1) + baroffset;
+        const predictedoptions = ["FALL (↓)","EQUAL (=)","RAISE (↑)"];
+        dots.push({ x: xposition, y: max/2, val: predictedoptions[pred[dates.length-1]+1], pred: pred[dates.length-1] });    
+    }
+
     return dots;
 }
 
-function drawLine(baroffset,data,max,graphwidth,barwidth,ispred=false) {
+function drawLine(baroffset,data,max,graphwidth,barwidth,pred) {
     var linegrad = ctx.createLinearGradient(baroffset, Y(data[0], max), graphwidth, dimenstion.graphHeight);
-    linegrad.addColorStop(0, (ispred ? "#fff6d3" : "#53c4ee"));
-    linegrad.addColorStop(1, (ispred ? "#ffeca4" : "#8bd6f2"));
+    linegrad.addColorStop(0, "#53c4ee");
+    linegrad.addColorStop(1, "#8bd6f2");
 
     // graph line
     ctx.beginPath();
@@ -85,7 +91,7 @@ function drawLine(baroffset,data,max,graphwidth,barwidth,ispred=false) {
     ctx.moveTo(baroffset, Y(data[0], max));
     for (let i = 0; i < data.length; i++) {
         const xposition = barwidth * i + baroffset;
-        dots.push({ x: xposition, y: Y(data[i], max), val: data[i] });
+        dots.push({ x: xposition, y: Y(data[i], max), val: data[i], pred: pred[i] });
         ctx.lineTo(dots[dots.length-1].x, dots[dots.length-1].y);
     }
     ctx.stroke();
@@ -98,7 +104,7 @@ function drawLine(baroffset,data,max,graphwidth,barwidth,ispred=false) {
     var x2 = x1, y2 = dimenstion.graphHeight;
     var fillgrad = ctx.createLinearGradient(x1, y1, x2, y2);
 
-    fillgrad.addColorStop(0, (ispred ? "#f2e78b57" : "#8bd6f257"));
+    fillgrad.addColorStop(0, "#8bd6f257");
     fillgrad.addColorStop(1, "#ffffff00");
     ctx.fillStyle = fillgrad;
     ctx.fill();
