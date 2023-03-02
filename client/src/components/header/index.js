@@ -133,6 +133,7 @@ const Login = ({ onLogout, isUserSignedIn, setIsUserSignedIn }) => {
     const [profile, setProfile] = useState(window.PATH + "/images/profile-blank.png");
     const [name, setName] = useState("");
     const [showMenu, setShowMenu] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const onLoginSuccessful = () => {
         setIsUserSignedIn(true);
@@ -141,6 +142,7 @@ const Login = ({ onLogout, isUserSignedIn, setIsUserSignedIn }) => {
 
     const googleLogin = useGoogleLogin({
         onSuccess: async ({ code }) => {
+            setLoading(true);
             const loginResult = await auth({ code });
             if (loginResult.pass) {
                 onLoginSuccessful();
@@ -148,12 +150,14 @@ const Login = ({ onLogout, isUserSignedIn, setIsUserSignedIn }) => {
             } else {
                 alert("Unexpected error, try again later");
             }
+            setLoading(false);
         },
         flow: 'auth-code'
     });
 
     useEffect(() => {
         async function getDetails() {
+            setLoading(true);
             const d = await mydetails();
             if (d.pass) {
                 setProfile(d.data[0].picture);
@@ -168,6 +172,7 @@ const Login = ({ onLogout, isUserSignedIn, setIsUserSignedIn }) => {
                         onLogout();
                 }
             }
+            setLoading(false);
         }
         if (isUserSignedIn) {
             getDetails();
@@ -193,10 +198,10 @@ const Login = ({ onLogout, isUserSignedIn, setIsUserSignedIn }) => {
 
     return (
         <div className="userheader" ref={userRef}>
-            {!isUserSignedIn &&
+            {!isUserSignedIn && !loading &&
                 <button onClick={() => googleLogin()}><i className="bi bi-google"></i> Sign in</button>
             }
-            {isUserSignedIn &&
+            {isUserSignedIn && !loading &&
                 <>
                     <img src={profile} onClick={openMenu} referrerPolicy="no-referrer" />
                     {showMenu && 
@@ -208,6 +213,7 @@ const Login = ({ onLogout, isUserSignedIn, setIsUserSignedIn }) => {
                         </ul>
                     </div> }
                 </>}
+            {loading && <div className='loading'></div>}
         </div>
     )
 }

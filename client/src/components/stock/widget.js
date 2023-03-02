@@ -5,21 +5,25 @@ import { removesaved, addsaved } from '../../api';
 export default function StockWidget(props) {
     const { stock, isColumn, Sort, i, optionClick } = props;
     const [add, setAdd] = useState(stock.saved ? stock.saved : false);
+    const [loading, setLoading] = useState(false);
 
     const menuOptionClick = async (e) => {
         e.preventDefault();  
-
-        let d = (!add ? await addsaved(stock.id) : await removesaved(stock.id));
-        if(d.pass) {
-            optionClick();
-            setAdd(val => !val);
-        }else{
-            alert("error");
+        if(!loading) {
+            setLoading(true);
+            let d = (!add ? await addsaved(stock.id) : await removesaved(stock.id));
+            if(d.pass) {
+                optionClick();
+                setAdd(val => !val);
+            }else{
+                alert("error");
+            }
+            setLoading(false);
         }
     }
 
     return (
-        <div className={"stock-widget" + (isColumn ? "" : " col-lg-3")} id={i ? "drag" + i : ""}>
+        <div className={"stock-widget" + (isColumn ? "" : " col-lg-3")} id={!isNaN(i) ? "drag" + i : ""}>
             <Link to={window.PATH + "/stock/" + stock.symbol} draggable="false">
                 <div className={"stock" + (i === 0 && isColumn ? " top-stock" : "")} draggable="true" id={"widget" + i}
                     onDragStart={() => { if (Sort) { Sort.dragstart(i) } }}
@@ -28,7 +32,7 @@ export default function StockWidget(props) {
                     onDragEnd={() => { if (Sort) { Sort.dragend() } }}>
 
                     {(stock.saved !== undefined && optionClick) &&
-                        <div className="stock-option" onClick={e => menuOptionClick(e) }>
+                        <div className={"stock-option" + ((loading) ? " wait" : "")} onClick={e => menuOptionClick(e) }>
                             {!add ? <i className="bi bi-bookmark"></i> : <i className="bi bi-bookmark-fill"></i>}
                         </div>
                     }

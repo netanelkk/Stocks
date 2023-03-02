@@ -24,6 +24,17 @@ const Categories = ({ categories, filtered, setFiltered }) => {
                         {cat.name}
                     </span>))
             }
+
+            {!categories &&
+                <>
+                    <span className='catloading'>
+                    </span>
+                    <span className='catloading'>
+                    </span>
+                    <span className='catloading'>
+                    </span>
+                </>
+            }
         </div>
     )
 };
@@ -127,7 +138,7 @@ function Stocks(props) {
             <div className="row">
                 <Async promiseFn={getData}>
                     {({ data, error, isPending }) => {
-                        if (isPending) return (<>Loading..</>);
+                        if (isPending) return (<div className='loading-large' style={{ height: "400px" }}></div>);
                         if (error) return (
                             <>
                                 <div className="stocks-title">

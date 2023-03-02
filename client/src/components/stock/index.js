@@ -110,20 +110,24 @@ const Graph = ({ stockid }) => {
 
 const StockElements = ({ data }) => {
     const [add, setAdd] = useState(data.saved);
+    const [loading, setLoading] = useState(false);
 
     const menuOptionClick = async (e) => {
         e.preventDefault();
-
+        setLoading(true);
         let d = (!add ? await addsaved(data.id) : await removesaved(data.id));
         if (d.pass) {
             setAdd(val => !val);
         } else {
             alert("error");
         }
+        setLoading(false);
     }
 
+    
     useEffect(() => {
         if (data.saved) {
+            ReactTooltip.rebuild();
             document.getElementsByClassName("stock-saved")[0].style.display = "none";
             setTimeout(() => {
                 document.getElementsByClassName("stock-saved")[0].style.display = "block";
@@ -131,7 +135,7 @@ const StockElements = ({ data }) => {
             }, 10);
         }
     }, [add]);
-
+    
     return (
         <>
             <div id="stockpage-title">
@@ -142,7 +146,7 @@ const StockElements = ({ data }) => {
                 </div>
                 <h1>{data.name + " (" + data.symbol + ")"}</h1>
 
-                {data.saved !== undefined &&
+                {data.saved !== undefined && !loading &&
                     <div className="stock-box">
                         <div className='stock-saved' onClick={e => menuOptionClick(e)}
                             data-tip={!add ? "Add to saved" : "Remove from saved"}>
@@ -150,6 +154,8 @@ const StockElements = ({ data }) => {
                         </div>
                     </div>
                 }
+
+                {loading && <div className='loading'></div>}
 
                 <div className="stock-box">
                     <span className="stock-price">{"$" + data.close}</span>

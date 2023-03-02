@@ -15,17 +15,18 @@ function Top(props) {
         (async () => {
             const d = await fetchAll("");
             if (!d.pass) throw new Error(d.msg);
+            console.log(d.data);
             let data = d.data;
-            data.sort((a, b) => { return a.stock_difference_percentage < b.stock_difference_percentage });
+            data.sort((a, b) => { return b.stock_difference_percentage - a.stock_difference_percentage });
             setTopPercentage(data.slice(0, 5));
 
-            data.sort((a, b) => { return a.stock_difference_percentage > b.stock_difference_percentage });
+            data.sort((a, b) => { return a.stock_difference_percentage - b.stock_difference_percentage });
             setLowPercentage(data.slice(0, 5));
 
-            data.sort((a, b) => { return a.stock_difference < b.stock_difference });
+            data.sort((a, b) => { return b.stock_difference - a.stock_difference });
             setTopDifference(data.slice(0, 5));
 
-            data.sort((a, b) => { return a.stock_difference > b.stock_difference });
+            data.sort((a, b) => { return a.stock_difference - b.stock_difference });
             setLowDifference(data.slice(0, 5));
         })();
     }, []);

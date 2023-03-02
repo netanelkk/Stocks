@@ -40,7 +40,7 @@ function Saved(props) {
                 {isUserSignedIn &&
                     <Async promiseFn={getSaved}>
                         {({ data, error, isPending }) => {
-                            if (isPending) return (<>Loading..</>);
+                            if (isPending) return (<div className='loading-large' style={{height:"400px"}}></div>);
                             if (error) return (<div id="notice">
                                                     <p>Click on <i className="bi bi-bookmark" id=""></i> icon to add stocks</p>
                                                 </div>);
