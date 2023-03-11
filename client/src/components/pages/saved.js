@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { StockWidget } from '../stock/widget';
 import { mysaved, reorder } from '../../api';
-import { Sort } from './sort';
+import { Sort } from '../../plugins/sort';
 import Async from "react-async";
 
 function Saved(props) {

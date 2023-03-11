@@ -2,10 +2,17 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require('body-parser');
 
+/*
+const options = {
+  key: fs.readFileSync('/etc/letsencrypt/live/netanel.vps.webdock.cloud/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/netanel.vps.webdock.cloud/fullchain.pem')
+};
+*/
+
 class Server {
   constructor() {
     this.app = express();
-    this.port = 5000;
+    this.port = 4100;
     this.paths = {
       main: "/main",
       stock: "/stock",
@@ -27,7 +34,7 @@ class Server {
     // delay for testing - TODO: Remove it
 /*
     this.app.use(function(req,res,next){
-      setTimeout(next, 3000);
+      setTimeout(next, 1000);
     }); 
 */
   }
@@ -41,6 +48,7 @@ class Server {
 
   listen() {
     this.server = this.app.listen(this.port);
+    //this.server = https.createServer(options, this.app).listen(this.port);
   }
 }
 

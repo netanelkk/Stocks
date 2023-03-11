@@ -23,7 +23,6 @@
     "react-scripts": "5.0.1",
     "react-string-replace": "^1.1.0",
     "react-time-ago": "^7.2.1",
-    "react-tooltip": "^4.2.21",
     "react-top-loading-bar": "^2.1.0",
     "save": "^2.5.0",
     "video-react": "^0.15.0",
@@ -52,5 +51,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "react-tooltip": "^5.10.0"
   }
 }

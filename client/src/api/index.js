@@ -35,9 +35,9 @@ async function request(url, data, requestMethod = "POST") {
 const local = true;
 let API_URL = "";
 if (local) {
-  API_URL = "http://10.0.0.10:5000";
+  API_URL = "http://10.0.0.10:4100";
 } else {
-  API_URL = "https://netanel.vps.webdock.cloud:5000";
+  API_URL = "https://netanel.vps.webdock.cloud:4100";
 }
 
 export async function fetchHome() {

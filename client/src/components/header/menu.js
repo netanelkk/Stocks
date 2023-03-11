@@ -19,7 +19,7 @@ function Menu() {
         <div className="menu">
             <ul>
                 <Link to={window.PATH + "/"}>
-                    <li className={(path==="") ? "active" : ""}>
+                    <li className={(path===""||!path) ? "active" : ""}>
                         <i className="bi bi-house"></i>
                         <div>HOME</div>
                     </li>

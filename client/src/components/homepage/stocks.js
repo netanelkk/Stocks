@@ -39,9 +39,9 @@ const Categories = ({ categories, filtered, setFiltered }) => {
     )
 };
 
-let sortoptions = ["Relevance", "Alphabetic Order (A-Z)", "Stock Price (High to Low)"];
+let sortoptions = ["Relevance", "Alphabetic Order (A-Z)", "Stock Price (Low to High)", "*TODO:CHECK*Stock Price (High to Low)"];
 const StocksPage = (props) => {
-    const { query, count } = props;
+    const { query } = props;
     const [data, setData] = useState(props.data);
     const [activeSort, setActiveSort] = useState(1);
     const [categories, setCategories] = useState();
@@ -63,6 +63,9 @@ const StocksPage = (props) => {
                 break;
             case 3:
                 arr.sort((a, b) => { return a.price < b.price });
+                break;
+            case 4:
+                arr.sort((a, b) => { return a.price > b.price });
                 break;
         }
         return arr;
@@ -104,6 +107,9 @@ const StocksPage = (props) => {
                                     <NavDropdown.Item onClick={() => { order(3) }} className={((activeSort === 3) ? "active" : "")}>
                                         {sortoptions[2]}
                                     </NavDropdown.Item>
+                                    <NavDropdown.Item onClick={() => { order(4) }} className={((activeSort === 4) ? "active" : "")}>
+                                        {sortoptions[3]}
+                                    </NavDropdown.Item>
                                 </NavDropdown>
                             </Nav>
                         </Navbar.Collapse>
@@ -119,7 +125,6 @@ const StocksPage = (props) => {
 function Stocks(props) {
     const { topRef } = props;
     const { query } = useParams();
-    const [count, setCount] = useState(0);
 
     useEffect(() => {
         topRef.current.scrollTop = 0;
@@ -128,7 +133,6 @@ function Stocks(props) {
     const getData = async () => {
         const d = await fetchAll((query) ? query : "");
         if (!d.pass) throw new Error(d.msg);
-        setCount(d.data.length);
         return d.data;
     }
 
@@ -149,7 +153,7 @@ function Stocks(props) {
                         );
                         if (data) {
                             return (
-                                <StocksPage data={data} count={count} query={query} />
+                                <StocksPage data={data} query={query} />
                             );
                         }
                     }}

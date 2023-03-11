@@ -1,17 +1,17 @@
 const dimenstion = {
-    height: 300,
-    graphHeight: 300 - 20
+    height: 400,
+    graphHeight: 400 - 20,
+    barwidth: 0
 };
 
 // offset in x axis
 const xoffset = {
     left: 100,
-    right: 10
+    right: 30
 }
 
 var ctx, dots = [];
 export function graph(c, data, pred, dates) {
-
     let maxdata = data;
     if(data.length==0) {
         maxdata = [0];
@@ -54,9 +54,10 @@ export function graph(c, data, pred, dates) {
 
 
     // x axis details
-    const graphwidth = dimenstion.width - xoffset.left - xoffset.right;
+    const graphwidth = dimenstion.width - xoffset.left / 2 - xoffset.right;
     const barwidth = graphwidth / dates.length;
     const baroffset = barwidth / 2 + xoffset.left / 2;
+    dimenstion.barwidth = barwidth;
     for (let i = 0; i < dates.length; i++) {
         const xval = dates[i];
         const xposition = barwidth * i + baroffset - ctx.measureText(xval).width / 2;
@@ -70,7 +71,7 @@ export function graph(c, data, pred, dates) {
 
     if(pred.length > data.length) {
         const xposition = barwidth * (dates.length-1) + baroffset;
-        const predictedoptions = ["FALL (↓)","EQUAL (=)","RAISE (↑)"];
+        const predictedoptions = ["FALL","EQUAL","RAISE"];
         dots.push({ x: xposition, y: max/2, val: predictedoptions[pred[dates.length-1]+1], pred: pred[dates.length-1] });    
     }
 
@@ -112,5 +113,9 @@ function drawLine(baroffset,data,max,graphwidth,barwidth,pred) {
 
 function Y(val, max) {
     return dimenstion.graphHeight - (val / (max===0?1:max)) * dimenstion.graphHeight;
+}
+
+export function graphwidth() {
+    return dimenstion.barwidth;
 }
 

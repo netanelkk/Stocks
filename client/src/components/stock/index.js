@@ -1,26 +1,44 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams } from "react-router-dom";
 import { fetchBySymbol, fetchSuggestions, fetchGraph, addComment, fetchComments, deletecomment, removesaved, addsaved } from '../../api';
-import { graph } from './graph';
-import ReactTooltip from 'react-tooltip';
+import { graph, graphwidth } from '../../plugins/graph';
+import { Tooltip } from 'react-tooltip';
 import { StockWidget } from '../stock/widget';
 import Async from "react-async";
 import ReactTimeAgo from 'react-time-ago'
+import 'react-tooltip/dist/react-tooltip.css'
 
+let graphdata = { data: [], pred: [], dates: [] };
 const Graph = ({ stockid }) => {
     const graphRef = useRef(null);
     const [dots, setDots] = useState(null);
     const [graphDots, setGraphDots] = useState(null);
     const [range, setRange] = useState(30);
 
+    useEffect(() => {
+        window.addEventListener("resize", debounce);
+        return () => {
+            window.removeEventListener("resize", debounce);
+        }
+    }, []);
+
+    var timer;
+    function debounce() {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(refreshGraph, 100);
+    }
+
+    function refreshGraph() {
+        setGraphDots(graph(graphRef.current, graphdata.data, graphdata.pred, graphdata.dates));
+    }
 
     useEffect(() => {
         (async () => {
             const d = await fetchGraph(stockid, range);
             if (!d.pass) throw new Error(d.msg);
-            let graphdata = { data: [], pred: [], dates: [] };
-            initGraphData(d.data, graphdata);
-            setGraphDots(graph(graphRef.current, graphdata.data, graphdata.pred, graphdata.dates));
+            graphdata = { data: [], pred: [], dates: [] };
+            initGraphData(d.data);
+            refreshGraph();
         })();
     }, [range]);
 
@@ -28,22 +46,34 @@ const Graph = ({ stockid }) => {
         if (dots && graphDots) {
             if (graphDots.length > 1) {
                 cleanDots();
+                const width = graphwidth();
                 for (let i = 1; i <= graphDots.length; i++) {
-                    document.getElementById("point" + i).style.left = (graphDots[i - 1].x - 20) + "px";
-                    document.getElementById("point" + i).style.top = (graphDots[i - 1].y) + "px";
+                    document.getElementById("point" + i).style.left = (width * (i - 1) + 50) + "px";
+                    document.getElementById("point" + i).style.paddingTop = (graphDots[i - 1].y) + "px";
+                    document.getElementById("point" + i).style.width = width + "px";
                     document.getElementById("point" + i).style.display = "block";
 
                     document.getElementById("point" + i).classList.remove("raise");
                     document.getElementById("point" + i).classList.remove("fall");
-                    if (graphDots[i - 1].pred > 0) {
-                        document.getElementById("point" + i).classList.add("raise");
-                    } else if (graphDots[i - 1].pred < 0) {
-                        document.getElementById("point" + i).classList.add("fall");
+
+                    const tipdata = {
+                        date: graphdata.dates[i - 1],
+                        price: graphDots[i - 1].val + (!isNaN(graphDots[i - 1].val) ? " $" : ""),
+                        prediction: ""
                     }
 
-                    document.getElementById("point" + i).setAttribute("data-tip", graphDots[i - 1].val + (!isNaN(graphDots[i - 1].val) ? " $" : ""));
+                    if (graphDots[i - 1].pred > 0) {
+                        document.getElementById("point" + i).classList.add("raise");
+                        tipdata.prediction = "<b>PREDICTED</b><i class='bi bi-chevron-compact-up raise'></i>";
+                    } else if (graphDots[i - 1].pred < 0) {
+                        document.getElementById("point" + i).classList.add("fall");
+                        tipdata.prediction = "<b>PREDICTED</b><i class='bi bi-chevron-compact-down fall'></i>";
+                    }
+
+                    document.getElementById("point" + i).setAttribute("data-tooltip-html", "<div>" + tipdata.date + "</div><h3>" + tipdata.price + "</h3>" + tipdata.prediction);
+                    document.getElementById("point" + i).setAttribute("data-tooltip-id", "tooltip");
+
                 }
-                ReactTooltip.rebuild();
             }
         }
     }, [dots, graphDots]);
@@ -55,15 +85,15 @@ const Graph = ({ stockid }) => {
         }
     }
 
-    const initGraphData = (stockdata, graphdata) => {
+    const initGraphData = (stockdata) => {
         let dotselements = [];
         for (let i = stockdata.length - 1; i >= 0; i--) {
-            if (stockdata[i].close) {
+            if (stockdata[i].close !== null) {
                 graphdata.data.push(stockdata[i].close);
             }
 
             graphdata.pred.push(stockdata[i].prediction);
-            graphdata.dates.push(stockdata[i].date);
+            graphdata.dates.push(formatdate(stockdata[i].date));
 
             dotselements.push(<div className='point-space' id={"point" + (i + 1)} key={"point" + (i + 1)}>
                 <div className='point'></div>
@@ -72,28 +102,32 @@ const Graph = ({ stockid }) => {
         setDots(dotselements);
     };
 
+    function formatdate(fulldate) {
+        const date = new Date(fulldate);
+        var d = date.getDate();
+        var m = date.getMonth() + 1;
+        var y = date.getFullYear() - 2000;
+        return (d <= 9 ? '0' + d : d) + '.' + (m <= 9 ? '0' + m : m) + '.' + y;
+    }
+
     return (
         <>
             <div className="graph-menu">
                 <div className="graph-hint">
                     <span>Predicted:</span>
                     <div className="hint">
-                        <div className='raise' id="guidepoint"></div>
+                        <i className="bi bi-chevron-compact-up raise"></i>
                         <span>RAISE</span>
                     </div>
                     <div className="hint">
-                        <div className='fall' id="guidepoint"></div>
+                        <i className="bi bi-chevron-compact-down fall"></i>
                         <span>FALL</span>
-                    </div>
-                    <div className="hint">
-                        <div id="guidepoint"></div>
-                        <span>NO INFO</span>
                     </div>
                 </div>
                 <ul>
-                    <li className={(range === 7) ? "active" : ""} onClick={() => { setRange(7) }}>1 week</li>
-                    <li className={(range === 30) ? "active" : ""} onClick={() => { setRange(30) }}>1 month</li>
-                    <li className={(range === 365) ? "active" : ""} onClick={() => { setRange(365) }}>1 year</li>
+                    <li className={(range === 7) ? "active" : ""} onClick={() => { setRange(7); setDots(null); }}>1 week</li>
+                    <li className={(range === 30) ? "active" : ""} onClick={() => { setRange(30); setDots(null); }}>1 month</li>
+                    <li className={(range === 365) ? "active" : ""} onClick={() => { setRange(365); setDots(null); }}>1 year</li>
                 </ul>
             </div>
 
@@ -101,8 +135,8 @@ const Graph = ({ stockid }) => {
                 <div className="graph-dots">
                     {dots}
                 </div>
-                {!dots ? <div className='loading-large' style={{position:"absolute",right: 0,left: 0}}></div> : "" }
-                <canvas width="0" height="300" ref={graphRef}></canvas>
+                {!dots ? <div className='loading-large' style={{ position: "absolute", right: 0, left: 0 }}></div> : ""}
+                <canvas width="0" height="400" ref={graphRef} className={!dots ? "hide" : ""}></canvas>
             </div>
         </>
     )
@@ -124,18 +158,16 @@ const StockElements = ({ data }) => {
         setLoading(false);
     }
 
-    
+
     useEffect(() => {
         if (data.saved) {
-            ReactTooltip.rebuild();
             document.getElementsByClassName("stock-saved")[0].style.display = "none";
             setTimeout(() => {
                 document.getElementsByClassName("stock-saved")[0].style.display = "block";
-                ReactTooltip.rebuild();
             }, 10);
         }
     }, [add]);
-    
+
     return (
         <>
             <div id="stockpage-title">
@@ -247,6 +279,8 @@ const AddComment = ({ stockid, setReloadComments }) => {
         if (sendResult.pass) {
             setContent("");
             setReloadComments(val => val + 1);
+        }else{
+            alert("Unexpected error, try again");
         }
         addLoading(false);
     };
@@ -382,6 +416,8 @@ const Discussion = ({ stockid, isUserSignedIn }) => {
             <div className="discussion-box">
                 {isUserSignedIn &&
                     <AddComment stockid={stockid} setReloadComments={setReloadComments} />}
+                {!isUserSignedIn &&
+                    <div id="guest-comment">You must be <a href="#">logged in</a> to comment</div>}
                 <div className="comments" onScroll={() => onScroll()} ref={listInnerRef}>
                     <MapComments data={data} setCommentCount={setCommentCount} />
                     {loading && commentLoading()}
@@ -420,10 +456,10 @@ function Stock(props) {
 
     return (
         <>
-            <ReactTooltip />
+            <Tooltip id="tooltip" classNameArrow="tooltip-arrow" />
             <Async promiseFn={getData}>
                 {({ data, error, isPending }) => {
-                    if (isPending) return (<div className='loading-large' style={{height:"200px"}}></div>);
+                    if (isPending) return (<div className='loading-large' style={{ height: "200px" }}></div>);
                     if (error) return (<div id="notice">
                         <i className="bi bi-exclamation-circle"></i>
                         <p>
@@ -436,7 +472,7 @@ function Stock(props) {
                             <StockElements data={data} />
 
                             <Discussion isUserSignedIn={isUserSignedIn} stockid={data.id} />
-                            
+
                             <h1 id="seealso">See Also</h1>
                             <Async promiseFn={getSuggestions}>
                                 {({ data, error, isPending }) => {
@@ -445,7 +481,7 @@ function Stock(props) {
                                     if (data) {
                                         return (
                                             <>
-                                                <div className="row">
+                                                <div className="row" id="nomargin">
                                                     {data.map(stock => (<StockWidget stock={stock} key={"suggestion" + stock.id} optionClick={() => { }} />))}
                                                 </div>
                                             </>

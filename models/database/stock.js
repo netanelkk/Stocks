@@ -80,8 +80,20 @@ Stock.stockData = (stockid,range) => {
                     FROM stock_data SD
                     LEFT JOIN stock_prediction SP
                     ON SD.stockid = SP.stockid AND SD.date = SP.date)) t
-              WHERE stockid = ? AND datediff(CURRENT_DATE(), date) < ?
-              ORDER BY date DESC`, [stockid,range], (err, res) => {
+              WHERE stockid = ? AND ` +
+              ((range == 365) ? `date BETWEEN (CURDATE() - INTERVAL 1 YEAR) AND CURDATE()
+                                    AND date IN (
+                                      SELECT MIN(date)
+                                      FROM stock_data
+                                      WHERE date BETWEEN (CURDATE() - INTERVAL 1 YEAR) AND CURDATE()
+                                      GROUP BY YEAR(date), MONTH(date)
+                                          UNION ALL
+                                      SELECT MAX(date)
+                                      FROM stock_data
+                                      WHERE date BETWEEN (CURDATE() - INTERVAL 1 YEAR) AND CURDATE()
+                                      GROUP BY YEAR(date), MONTH(date)
+              )` : `datediff(CURRENT_DATE(), date) < `+ range)
+              + ` ORDER BY date DESC`, [stockid], (err, res) => {
       if (err) { return reject(err); }
       if (res.length == 0) { const empty = []; return resolve(empty); }
       return resolve(res);

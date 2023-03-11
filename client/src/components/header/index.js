@@ -4,27 +4,51 @@ import { useNavigate } from "react-router-dom";
 import { suggestion, auth, mydetails } from '../../api';
 import { useGoogleLogin } from '@react-oauth/google';
 
-const Suggestion = ({ data, isActive }) => {
+
+
+const Suggestion = ({ data, isActive, setReloadHistory, setClose }) => {
+
+    const removeitem = () => {
+        let newsearchhistory = [];
+        for (const i in searchhistory) {
+            if (searchhistory[i] !== data.name) {
+                newsearchhistory.push(searchhistory[i]);
+            }
+        }
+        searchhistory = newsearchhistory;
+        setReloadHistory(val => val + 1);
+        localStorage.setItem("searchhistory", JSON.stringify(newsearchhistory));
+    }
+
+
     return (
-        <Link to={window.PATH + "/stock/" + data.symbol}>
+        <Link to={window.PATH + (data.symbol ? "/stock/" + data.symbol : "/stocks/" + data.name)} onClick={ e => { if(e.target.className !== 'remove-item' && e.target.className !== 'bi bi-x-lg') { setClose(val => val + 1); } } }>
             <div className={"suggestion-row" + ((isActive) ? " active" : "")}>
-                <div className="stock-img">
-                    <div>
-                        <img src={window.PATH + "/images/stocks/" + data.icon} />
-                    </div>
-                </div>
+                {data.icon &&
+                    <div className="stock-img">
+                        <div>
+                            <img src={window.PATH + "/images/stocks/" + data.icon} />
+                        </div>
+                    </div>}
                 <div className="stock-data">
                     <div className="stock-title">
                         <h2>{data.name}</h2>
                     </div>
-                    <div className="stock-price">${data.price}</div>
+                    {data.price &&
+                        <div className="stock-price">${data.price}</div>}
+                    {!data.price &&
+                        <div className='remove-item' onClick={e => { e.preventDefault(); removeitem(); }}>
+                            <i className="bi bi-x-lg"></i>
+                        </div>
+                    }
                 </div>
             </div>
         </Link>
     );
 }
 
-var sugIndexValue = -1, sugcount = 0;
+var sugIndexValue = -1, sugcount = 0, searchhistory = JSON.parse(localStorage.getItem("searchhistory") ? localStorage.getItem("searchhistory") : '[]');
+let historyrows = [];
 const Search = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [showSuggestions, setShowSuggetions] = useState(false);
@@ -32,7 +56,11 @@ const Search = () => {
     const [loading, setLoading] = useState(false);
     const [sugIndex, setSugIndex] = useState(sugIndexValue);
     const [showSearch, setShowSearch] = useState(false);
+    const [hideRecent, setHideRecent] = useState(false);
+    const [reloadHistory, setReloadHistory] = useState(0);
+    const [close, setClose] = useState(0);
     const inputRef = useRef(null);
+    const deleteRef = useRef(null);
 
     const navigate = useNavigate();
     const onQueryChange = (event) => {
@@ -44,9 +72,11 @@ const Search = () => {
 
     const onSubmit = async (event) => {
         event.preventDefault();
+        setShowSuggetions(false);
+        inputRef.current.blur();
         if (searchQuery !== "") {
-            setShowSuggetions(false);
-            inputRef.current.blur();
+            if (!searchhistory.includes(searchQuery)) searchhistory.push(searchQuery);
+            localStorage.setItem("searchhistory", JSON.stringify(searchhistory));
             if (sugIndexValue < 0 || sugIndexValue === sugcount) {
                 navigate(window.PATH + "/stocks/" + encodeURIComponent(encodeURIComponent((searchQuery))));
             } else {
@@ -54,35 +84,65 @@ const Search = () => {
             }
             setSugIndex(-1);
             sugIndexValue = -1;
+        } else {
+            navigate(window.PATH + "/stocks/" + encodeURIComponent(encodeURIComponent(historyrows[sugIndexValue].name)));
+            setSugIndex(-1);
+            sugIndexValue = -1;
         }
     };
 
     useEffect(() => {
-        const getSuggestions = async () => {
-            setLoading(true);
-            const d = await suggestion(searchQuery);
-            if (!d.pass) {
-                sugcount = 0;
-                setData([]);
-            } else {
-                sugcount = d.data.length;
-                setData(d.data);
-            }
-            setLoading(false);
+        if (searchQuery === "") {
+            recentMode();
         }
-        if (searchQuery !== "")
-            getSuggestions();
-        else
-            setShowSuggetions(false);
+    }, [showSuggestions, reloadHistory]);
+
+    useEffect(() => {
+        if (searchQuery) {
+            if (!hideRecent) setHideRecent(true);
+            const getSuggestions = async () => {
+                setLoading(true);
+                const d = await suggestion(searchQuery);
+                if (!d.pass) {
+                    sugcount = 0;
+                    setData([]);
+                } else {
+                    sugcount = d.data.length;
+                    setData(d.data);
+                }
+                setLoading(false);
+            }
+            if (searchQuery !== "")
+                getSuggestions();
+            else
+                setShowSuggetions(false);
+        }else{
+            recentMode();
+        }
     }, [searchQuery]);
+
+    function recentMode() {
+        historyrows = [];
+        let counter = 0;
+        for (const i in searchhistory) {
+            if (counter < 6) {
+                historyrows.push({
+                    id: i,
+                    name: searchhistory[searchhistory.length - i - 1]
+                });
+                counter++;
+            }
+        }
+        sugcount = historyrows.length;
+        setData(historyrows);
+        setHideRecent(false);
+    }
 
     const wrapperRef = useRef(null);
     useEffect(() => {
         function handleClickOutside(event) {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-                setShowSuggetions(false);
-                setSugIndex(-1);
-                sugIndexValue = -1;
+                closeSugg();
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
@@ -91,12 +151,12 @@ const Search = () => {
         };
     }, [wrapperRef]);
 
-
     const onKeyPressed = (e) => {
         switch (e.key) {
             case "ArrowDown":
                 e.preventDefault();
-                sugIndexValue = (sugIndexValue + 1 < sugcount + 1) ? sugIndexValue + 1 : sugIndexValue;
+                let bottom = (hideRecent ? (sugIndexValue + 1 < sugcount + 1) : (sugIndexValue + 1 < sugcount))
+                sugIndexValue = (bottom ? sugIndexValue + 1 : sugIndexValue);
                 setSugIndex(sugIndexValue);
                 break;
             case "ArrowUp":
@@ -107,19 +167,30 @@ const Search = () => {
         }
     }
 
+    useEffect(closeSugg, [close]);
+
+    function closeSugg() {
+        setShowSuggetions(false);
+        setSugIndex(-1);
+        sugIndexValue = -1;
+    }
+
+    // onClick={() => { setShowSuggetions(false); }}
     return (
         <div className="search">
             <form onSubmit={onSubmit} id="search-form">
                 <div className="search-container" ref={wrapperRef}>
 
                     <input type="text" placeholder="Search for stock.." value={searchQuery} onChange={onQueryChange} onKeyDown={onKeyPressed}
-                        onFocus={() => { if (searchQuery !== "") { setShowSuggetions(true); } }} ref={inputRef}
+                        onFocus={() => { setShowSuggetions(true); }} ref={inputRef}
                         className={showSuggestions ? "searchinput active" : ""} />
 
-                    {showSuggestions && <div className="search-suggestion" onClick={() => { setShowSuggetions(false); }}>
+                    {showSuggestions && <div className="search-suggestion">
                         {loading && <div id="sug-loading"></div>}
-                        {data.map((row, index) => (<Suggestion key={row.id} data={row} isActive={(index === sugIndex)} />))}
-                        <div className={"suggestions-showmore" + ((sugIndex === sugcount) ? " active" : "")} onClick={onSubmit}>Show All Results</div>
+                        {!hideRecent && <div id="titlerecent">Recent Searches</div>}
+                        {!hideRecent && data.length === 0 && <div id="norecent">No Recent Searches</div>}
+                        {data.map((row, index) => (<Suggestion key={row.id} data={row} isActive={(index === sugIndex)} setReloadHistory={setReloadHistory} setClose={setClose} />))}
+                        {hideRecent && <div className={"suggestions-showmore" + ((sugIndex === sugcount) ? " active" : "")} onClick={onSubmit}>Show All Results</div>}
                     </div>
                     }
                 </div>
@@ -162,7 +233,7 @@ const Login = ({ onLogout, isUserSignedIn, setIsUserSignedIn }) => {
             if (d.pass) {
                 setProfile(d.data[0].picture);
                 setName(d.data[0].name)
-                if(localStorage.getItem('myid') === null)
+                if (localStorage.getItem('myid') === null)
                     localStorage.setItem("myid", d.data[0].id);
             } else {
                 if (d.msg === "AUTH_FAIL")
@@ -185,15 +256,15 @@ const Login = ({ onLogout, isUserSignedIn, setIsUserSignedIn }) => {
 
     const userRef = useRef(null);
     useEffect(() => {
-      function handleClickOutside(event) {
-        if (userRef.current && !userRef.current.contains(event.target)) {
-            setShowMenu(false);
+        function handleClickOutside(event) {
+            if (userRef.current && !userRef.current.contains(event.target)) {
+                setShowMenu(false);
+            }
         }
-      }
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
     }, [userRef]);
 
     return (
@@ -204,14 +275,14 @@ const Login = ({ onLogout, isUserSignedIn, setIsUserSignedIn }) => {
             {isUserSignedIn && !loading &&
                 <>
                     <img src={profile} onClick={openMenu} referrerPolicy="no-referrer" />
-                    {showMenu && 
-                    <div className="profile-menu">
-                        <h2>Hello {name}</h2>
-                        <ul>
-                            <Link to={window.PATH + "/account"} onClick={() => { setShowMenu(false); }}><li><i className="bi bi-person-circle"></i> Account</li></Link>
-                            <Link to={window.PATH + "/#logout"} onClick={(e) => { e.preventDefault(); setShowMenu(false); onLogout(); }}><li><i className="bi bi-box-arrow-right"></i> Logout</li></Link>
-                        </ul>
-                    </div> }
+                    {showMenu &&
+                        <div className="profile-menu">
+                            <h2>Hello {name}</h2>
+                            <ul>
+                                <Link to={window.PATH + "/account"} onClick={() => { setShowMenu(false); }}><li><i className="bi bi-person-circle"></i> Account</li></Link>
+                                <Link to={window.PATH + "/#logout"} onClick={(e) => { e.preventDefault(); setShowMenu(false); onLogout(); }}><li><i className="bi bi-box-arrow-right"></i> Logout</li></Link>
+                            </ul>
+                        </div>}
                 </>}
             {loading && <div className='loading'></div>}
         </div>

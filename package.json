@@ -44,6 +44,7 @@
     "socket.io-client": "^4.5.2"
   },
   "devDependencies": {
-    "concurrently": "^7.6.0"
+    "concurrently": "^7.6.0",
+    "react-tooltip": "^5.10.0"
   }
 }

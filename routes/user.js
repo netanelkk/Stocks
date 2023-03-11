@@ -8,11 +8,21 @@ const {
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 
-const oAuth2Client = new OAuth2Client(
-  "807610763496-k7j550ut1ngc77tq9mo0ehe3tv4gm2k7.apps.googleusercontent.com",
-  "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",
-  'postmessage',
-);
+const local = false;
+let oAuth2Client;
+if(local) {
+  oAuth2Client = new OAuth2Client(
+    "807610763496-k7j550ut1ngc77tq9mo0ehe3tv4gm2k7.apps.googleusercontent.com",
+    "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",
+    'postmessage',
+  );
+}else{
+  oAuth2Client = new OAuth2Client(
+    "1080386090306-m2d5qjqopa839bvlb7u9jhc3c0lng0qv.apps.googleusercontent.com",
+    "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",
+    'postmessage',
+  );
+}
 
 
 router.post('/auth', function (req, res, next) {
@@ -27,12 +37,9 @@ router.post('/auth', function (req, res, next) {
       return res.status(400).json({ msg: "" });
     });
   }).catch(e => {
-    console.log(e);
     return res.status(400).json({ msg: "Auth Failed!" });
   });
 });
-
-
 
 router.get('/mydetails', passport.authenticate('jwt', { session: false }), function (req, res) {
   const userId = req.user.id;

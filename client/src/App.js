@@ -21,14 +21,20 @@ import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en.json'
 TimeAgo.addDefaultLocale(en);
 
-window.PATH = "";
+const local = true;
+if(local) {
+  window.PATH = "";
+}else{
+  window.PATH = "/sources/marketmaven";
+}
+
 
 // list of pages with hidden menu
 const fullpages = ["stock","stocks","account"];
 
 const Pages = React.memo(({isUserSignedIn}) => {
   const { pathname } = useLocation();
-  const showmenu = !fullpages.includes(pathname.split("/")[1]);
+  const showmenu = !fullpages.includes(pathname.replace(window.PATH,'').split("/")[1]);
   const topRef = useRef();
 
   return (

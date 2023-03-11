@@ -3,7 +3,7 @@ import { StockWidget } from '../stock/widget';
 import { fetchHome, fetchArticles, addsaved } from '../../api';
 import Async from "react-async";
 import { Link } from "react-router-dom";
-import { Carousel } from "./carousel";
+import { Carousel } from "../../plugins/carousel";
 
 const Article = ({ data }) => {
     return (
