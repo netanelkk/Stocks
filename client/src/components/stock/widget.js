@@ -32,8 +32,9 @@ export default function StockWidget(props) {
                     onDragEnd={() => { if (Sort) { Sort.dragend() } }}>
 
                     {(stock.saved !== undefined && optionClick) &&
-                        <div className={"stock-option" + ((loading) ? " wait" : "")} onClick={e => menuOptionClick(e) }>
-                            {!add ? <i className="bi bi-bookmark"></i> : <i className="bi bi-bookmark-fill"></i>}
+                        <div className="stock-option" onClick={e => menuOptionClick(e) }>
+                            {!loading && (!add ? <i className="bi bi-bookmark"></i> : <i className="bi bi-bookmark-fill"></i>)}
+                            {loading && <div className='loading'></div>}
                         </div>
                     }
 

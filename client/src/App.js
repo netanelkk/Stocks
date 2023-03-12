@@ -9,7 +9,8 @@ import Top from './components/pages/top';
 import Saved from './components/pages/saved';
 import Account from './components/pages/account';
 import Analyse from './components/pages/analyse';
-import Error404 from './components/pages/error404'
+import Error404 from './components/pages/error404';
+import Footer from './components/footer';
 
 // Bootstrap CSS
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -24,8 +25,10 @@ TimeAgo.addDefaultLocale(en);
 const local = true;
 if(local) {
   window.PATH = "";
+  window.API_URL = "http://10.0.0.10:4100";
 }else{
   window.PATH = "/sources/marketmaven";
+  window.API_URL = "https://netanel.vps.webdock.cloud:4100";
 }
 
 
@@ -76,6 +79,7 @@ function App() {
            setIsUserSignedIn={setIsUserSignedIn} />
       <Pages isUserSignedIn={isUserSignedIn}
            setIsUserSignedIn={setIsUserSignedIn} />
+      <Footer />
     </BrowserRouter>
   );
 }

@@ -2,12 +2,11 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { suggestion, auth, mydetails } from '../../api';
-import { useGoogleLogin } from '@react-oauth/google';
+import FacebookLogin from 'react-facebook-login';
 
-
-
-const Suggestion = ({ data, isActive, setReloadHistory, setClose }) => {
-
+var sugIndexValue = -1, sugcount = 0, searchhistory = JSON.parse(localStorage.getItem("searchhistory") ? localStorage.getItem("searchhistory") : '[]');
+let historyrows = [], isrecentmode = true, arrownavigation = false;
+const Suggestion = ({ index, data, isActive, setReloadHistory, setClose, setSugIndex }) => {
     const removeitem = () => {
         let newsearchhistory = [];
         for (const i in searchhistory) {
@@ -20,9 +19,33 @@ const Suggestion = ({ data, isActive, setReloadHistory, setClose }) => {
         localStorage.setItem("searchhistory", JSON.stringify(newsearchhistory));
     }
 
+    const itemClick = e => {
+        if (e.target.className !== 'remove-item' && e.target.className !== 'bi bi-x-lg') {
+            setClose(val => val + 1);
+        }
+
+        if (!searchhistory.includes(data.name)) searchhistory.push(data.name);
+        localStorage.setItem("searchhistory", JSON.stringify(searchhistory));
+    }
+
+    const setActiveItem = () => {
+        activeItem(index);
+    }
+
+    const clearActiveItem = () => {
+        activeItem();
+    }
+
+    const activeItem = (val = -1) => {
+        setSugIndex(val); 
+        sugIndexValue = val;
+        arrownavigation = false;
+    }
+
 
     return (
-        <Link to={window.PATH + (data.symbol ? "/stock/" + data.symbol : "/stocks/" + data.name)} onClick={ e => { if(e.target.className !== 'remove-item' && e.target.className !== 'bi bi-x-lg') { setClose(val => val + 1); } } }>
+        <Link to={window.PATH + (data.symbol ? "/stock/" + data.symbol : "/stocks/" + data.name)} onClick={itemClick}
+            onMouseOver={setActiveItem} onMouseOut={clearActiveItem} >
             <div className={"suggestion-row" + ((isActive) ? " active" : "")}>
                 {data.icon &&
                     <div className="stock-img">
@@ -47,8 +70,6 @@ const Suggestion = ({ data, isActive, setReloadHistory, setClose }) => {
     );
 }
 
-var sugIndexValue = -1, sugcount = 0, searchhistory = JSON.parse(localStorage.getItem("searchhistory") ? localStorage.getItem("searchhistory") : '[]');
-let historyrows = [];
 const Search = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [showSuggestions, setShowSuggetions] = useState(false);
@@ -60,7 +81,6 @@ const Search = () => {
     const [reloadHistory, setReloadHistory] = useState(0);
     const [close, setClose] = useState(0);
     const inputRef = useRef(null);
-    const deleteRef = useRef(null);
 
     const navigate = useNavigate();
     const onQueryChange = (event) => {
@@ -75,13 +95,17 @@ const Search = () => {
         setShowSuggetions(false);
         inputRef.current.blur();
         if (searchQuery !== "") {
-            if (!searchhistory.includes(searchQuery)) searchhistory.push(searchQuery);
-            localStorage.setItem("searchhistory", JSON.stringify(searchhistory));
-            if (sugIndexValue < 0 || sugIndexValue === sugcount) {
+            let historyterm = searchQuery;
+            if (sugIndexValue < 0 || sugIndexValue === sugcount || !arrownavigation) {
                 navigate(window.PATH + "/stocks/" + encodeURIComponent(encodeURIComponent((searchQuery))));
             } else {
+                historyterm = data[sugIndexValue].name;
                 navigate(window.PATH + "/stock/" + data[sugIndexValue].symbol);
             }
+
+            if (!searchhistory.includes(historyterm)) searchhistory.push(historyterm);
+            localStorage.setItem("searchhistory", JSON.stringify(searchhistory));
+
             setSugIndex(-1);
             sugIndexValue = -1;
         } else {
@@ -93,22 +117,28 @@ const Search = () => {
 
     useEffect(() => {
         if (searchQuery === "") {
+            isrecentmode = true;
             recentMode();
         }
     }, [showSuggestions, reloadHistory]);
 
     useEffect(() => {
         if (searchQuery) {
-            if (!hideRecent) setHideRecent(true);
+            if (!hideRecent) {
+                setHideRecent(true);
+                isrecentmode = false;
+            }
             const getSuggestions = async () => {
                 setLoading(true);
                 const d = await suggestion(searchQuery);
-                if (!d.pass) {
-                    sugcount = 0;
-                    setData([]);
-                } else {
-                    sugcount = d.data.length;
-                    setData(d.data);
+                if (!isrecentmode) {
+                    if (!d.pass) {
+                        sugcount = 0;
+                        setData([]);
+                    } else {
+                        sugcount = d.data.length;
+                        setData(d.data);
+                    }
                 }
                 setLoading(false);
             }
@@ -116,7 +146,8 @@ const Search = () => {
                 getSuggestions();
             else
                 setShowSuggetions(false);
-        }else{
+        } else {
+            isrecentmode = true;
             recentMode();
         }
     }, [searchQuery]);
@@ -158,11 +189,13 @@ const Search = () => {
                 let bottom = (hideRecent ? (sugIndexValue + 1 < sugcount + 1) : (sugIndexValue + 1 < sugcount))
                 sugIndexValue = (bottom ? sugIndexValue + 1 : sugIndexValue);
                 setSugIndex(sugIndexValue);
+                arrownavigation = true;
                 break;
             case "ArrowUp":
                 e.preventDefault();
                 sugIndexValue = (sugIndexValue - 1 >= 0) ? sugIndexValue - 1 : sugIndexValue;
                 setSugIndex(sugIndexValue);
+                arrownavigation = true;
                 break;
         }
     }
@@ -175,7 +208,6 @@ const Search = () => {
         sugIndexValue = -1;
     }
 
-    // onClick={() => { setShowSuggetions(false); }}
     return (
         <div className="search">
             <form onSubmit={onSubmit} id="search-form">
@@ -189,7 +221,8 @@ const Search = () => {
                         {loading && <div id="sug-loading"></div>}
                         {!hideRecent && <div id="titlerecent">Recent Searches</div>}
                         {!hideRecent && data.length === 0 && <div id="norecent">No Recent Searches</div>}
-                        {data.map((row, index) => (<Suggestion key={row.id} data={row} isActive={(index === sugIndex)} setReloadHistory={setReloadHistory} setClose={setClose} />))}
+                        {data.map((row, index) => (<Suggestion key={row.id} data={row} isActive={(index === sugIndex)}
+                            setReloadHistory={setReloadHistory} setClose={setClose} setSugIndex={setSugIndex} index={index} />))}
                         {hideRecent && <div className={"suggestions-showmore" + ((sugIndex === sugcount) ? " active" : "")} onClick={onSubmit}>Show All Results</div>}
                     </div>
                     }
@@ -210,21 +243,6 @@ const Login = ({ onLogout, isUserSignedIn, setIsUserSignedIn }) => {
         setIsUserSignedIn(true);
         window.location.href = "";
     };
-
-    const googleLogin = useGoogleLogin({
-        onSuccess: async ({ code }) => {
-            setLoading(true);
-            const loginResult = await auth({ code });
-            if (loginResult.pass) {
-                onLoginSuccessful();
-                localStorage.setItem("token", loginResult.token);
-            } else {
-                alert("Unexpected error, try again later");
-            }
-            setLoading(false);
-        },
-        flow: 'auth-code'
-    });
 
     useEffect(() => {
         async function getDetails() {
@@ -267,14 +285,34 @@ const Login = ({ onLogout, isUserSignedIn, setIsUserSignedIn }) => {
         };
     }, [userRef]);
 
+    const fbLogin = async (response) => {
+        setLoading(true);
+        const code = response.accessToken;
+        if (code) {
+            const loginResult = await auth({ code });
+            if (loginResult.pass) {
+                onLoginSuccessful();
+                localStorage.setItem("token", loginResult.token);
+            } else {
+                alert("Unexpected error, try again later");
+            }
+        }
+        setLoading(false);
+    }
+
+
     return (
         <div className="userheader" ref={userRef}>
             {!isUserSignedIn && !loading &&
-                <button onClick={() => googleLogin()}><i className="bi bi-google"></i> Sign in</button>
-            }
+                <FacebookLogin
+                    textButton={<><i className="bi bi-facebook"></i> Sign in</>}
+                    appId="910446240268203"
+                    callback={fbLogin}
+                    cssClass="fb-login"
+                />}
             {isUserSignedIn && !loading &&
                 <>
-                    <img src={profile} onClick={openMenu} referrerPolicy="no-referrer" />
+                    <img src={window.API_URL + "/public/profile/" + profile} onClick={openMenu} referrerPolicy="no-referrer" />
                     {showMenu &&
                         <div className="profile-menu">
                             <h2>Hello {name}</h2>

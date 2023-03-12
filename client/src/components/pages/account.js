@@ -28,7 +28,7 @@ function Account(props) {
         <div className='accountpage'>
             {data && isUserSignedIn &&
                 <div className='userbox'>
-                    <img src={data.picture} />
+                    <img src={window.API_URL + "/public/profile/"+ data.picture} />
                     <div id="boxname">{data.name}</div>
                     <div id="boxemail">{data.email}</div>
                     <div id="boxdate">Joined at {data.registerdate.match(/\d{4}-\d{2}-\d{2}/)}</div>

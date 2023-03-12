@@ -69,7 +69,7 @@ async function run() {
   console.log("/*** GET API DATA ***/");
   for(let i = 0; i < rows.length; i++) {
     //await getStockData(rows[i].symbol, rows[i].id);
-    for(let j = 0; j < 2; j++) {
+    for(let j = 0; j < 7; j++) {
       await getStockData(rows[i].symbol, rows[i].id, j);
     }
   }

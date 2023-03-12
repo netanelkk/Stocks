@@ -176,18 +176,19 @@ const StockElements = ({ data }) => {
                         <img src={window.PATH + "/images/stocks/" + data.icon} />
                     </div>
                 </div>
+                <div className="stock-name">
                 <h1>{data.name + " (" + data.symbol + ")"}</h1>
 
                 {data.saved !== undefined && !loading &&
                     <div className="stock-box">
-                        <div className='stock-saved' onClick={e => menuOptionClick(e)}
-                            data-tip={!add ? "Add to saved" : "Remove from saved"}>
+                        <div className={'stock-saved' + (add ? ' active' : '')} onClick={e => menuOptionClick(e)}
+                            data-tooltip-html={!add ? "Add to saved" : "Remove from saved"} data-tooltip-id="tooltip">
                             {!add ? <i className="bi bi-bookmark"></i> : <i className="bi bi-bookmark-fill"></i>}
                         </div>
                     </div>
                 }
-
                 {loading && <div className='loading'></div>}
+                </div>
 
                 <div className="stock-box">
                     <span className="stock-price">{"$" + data.close}</span>
@@ -410,6 +411,10 @@ const Discussion = ({ stockid, isUserSignedIn }) => {
         }
     };
 
+    const triggerLogin = () => {
+        document.querySelector('.fb-login').click();
+    }
+
     return (
         <>
             <h1>Discussion ({commentCount})</h1>
@@ -417,7 +422,7 @@ const Discussion = ({ stockid, isUserSignedIn }) => {
                 {isUserSignedIn &&
                     <AddComment stockid={stockid} setReloadComments={setReloadComments} />}
                 {!isUserSignedIn &&
-                    <div id="guest-comment">You must be <a href="#">logged in</a> to comment</div>}
+                    <div id="guest-comment">You must be <span onClick={triggerLogin}>logged in</span> to comment</div>}
                 <div className="comments" onScroll={() => onScroll()} ref={listInnerRef}>
                     <MapComments data={data} setCommentCount={setCommentCount} />
                     {loading && commentLoading()}

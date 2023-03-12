@@ -5,47 +5,20 @@ import { useParams } from "react-router-dom";
 import Async from "react-async";
 import { Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import Container from 'react-bootstrap/Container';
+import Categories from '../stock/categories';
+import { useSearchParams } from 'react-router-dom';
 
-const Categories = ({ categories, filtered, setFiltered }) => {
-    const filter = (catid) => {
-        if (filtered.includes(catid)) {
-            setFiltered(filtered.filter(item => item !== catid));
-        } else {
-            setFiltered(items => [catid].concat(items));
-        }
-    }
-
-    return (
-        <div className='categories'>
-            {categories &&
-                categories.map(cat => (
-                    <span className={(filtered.includes(cat.id) ? "active" : "")} key={"cat" + cat.id} onClick={() => { filter(cat.id) }}>
-                        <i className={"bi " + cat.icon}></i>
-                        {cat.name}
-                    </span>))
-            }
-
-            {!categories &&
-                <>
-                    <span className='catloading'>
-                    </span>
-                    <span className='catloading'>
-                    </span>
-                    <span className='catloading'>
-                    </span>
-                </>
-            }
-        </div>
-    )
-};
-
-let sortoptions = ["Relevance", "Alphabetic Order (A-Z)", "Stock Price (Low to High)", "*TODO:CHECK*Stock Price (High to Low)"];
+let sortoptions = ["Relevance", "Alphabetic Order (A-Z)", "Stock Price (High to Low)", "Stock Price (Low to High)"];
+let sorticons = [<i className="bi bi-filter"></i>,
+<i className="bi bi-sort-alpha-down"></i>,
+<i className="bi bi-sort-numeric-down-alt"></i>,
+<i class="bi bi-sort-numeric-up-alt"></i>];
 const StocksPage = (props) => {
-    const { query } = props;
+    const { query, catId } = props;
     const [data, setData] = useState(props.data);
     const [activeSort, setActiveSort] = useState(1);
     const [categories, setCategories] = useState();
-    const [filtered, setFiltered] = useState([]);
+    const [filtered, setFiltered] = useState(catId ? [catId] : []);
 
 
     const order = (index) => {
@@ -99,16 +72,16 @@ const StocksPage = (props) => {
                             <Nav className="me-auto">
                                 <NavDropdown title={"Sort by " + sortoptions[activeSort - 1]} id="basic-nav-dropdown">
                                     <NavDropdown.Item onClick={() => { order(1) }} className={((activeSort === 1) ? "active" : "")}>
-                                        {sortoptions[0]}
+                                        {sorticons[0]} {sortoptions[0]}
                                     </NavDropdown.Item>
                                     <NavDropdown.Item onClick={() => { order(2) }} className={((activeSort === 2) ? "active" : "")}>
-                                        {sortoptions[1]}
+                                        {sorticons[1]} {sortoptions[1]}
                                     </NavDropdown.Item>
                                     <NavDropdown.Item onClick={() => { order(3) }} className={((activeSort === 3) ? "active" : "")}>
-                                        {sortoptions[2]}
+                                        {sorticons[2]} {sortoptions[2]}
                                     </NavDropdown.Item>
                                     <NavDropdown.Item onClick={() => { order(4) }} className={((activeSort === 4) ? "active" : "")}>
-                                        {sortoptions[3]}
+                                        {sorticons[3]} {sortoptions[3]}
                                     </NavDropdown.Item>
                                 </NavDropdown>
                             </Nav>
@@ -116,6 +89,7 @@ const StocksPage = (props) => {
                     </Container>
                 </Navbar>
             </div>
+
             <Categories categories={categories} filtered={filtered} setFiltered={setFiltered} />
 
             {data.map(stock => (<StockWidget stock={stock} key={"stock" + stock.id} optionClick={() => { }} />))}
@@ -125,10 +99,19 @@ const StocksPage = (props) => {
 function Stocks(props) {
     const { topRef } = props;
     const { query } = useParams();
+    const [searchParams] = useSearchParams();
+    const [catId, setCatId] = useState(0);
 
     useEffect(() => {
         topRef.current.scrollTop = 0;
     }, [query]);
+
+    useEffect(() => {
+        const cat = searchParams.get('cat');
+        if(cat) {
+            setCatId(Number(cat));
+        }
+    }, [searchParams]);
 
     const getData = async () => {
         const d = await fetchAll((query) ? query : "");
@@ -153,7 +136,7 @@ function Stocks(props) {
                         );
                         if (data) {
                             return (
-                                <StocksPage data={data} query={query} />
+                                <StocksPage data={data} query={query} catId={catId} />
                             );
                         }
                     }}

@@ -28,6 +28,8 @@ class Server {
     this.app.use(express.json());
     require('../middleware/passport');
 
+    this.app.use('*/profile',express.static('public/profile'));
+
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: true }));
 
