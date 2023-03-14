@@ -15,17 +15,21 @@ const Suggestion = ({ index, data, isActive, setReloadHistory, setClose, setSugI
             }
         }
         searchhistory = newsearchhistory;
+        console.log(searchhistory);
         setReloadHistory(val => val + 1);
         localStorage.setItem("searchhistory", JSON.stringify(newsearchhistory));
     }
 
     const itemClick = e => {
-        if (e.target.className !== 'remove-item' && e.target.className !== 'bi bi-x-lg') {
+        console.log(e.target.className);
+        if (e.target.className === 'remove-item' || e.target.className === 'bi bi-x-lg') {
+            e.preventDefault();
+            removeitem();
+        } else {
             setClose(val => val + 1);
+            if (!searchhistory.includes(data.name)) searchhistory.push(data.name);
+            localStorage.setItem("searchhistory", JSON.stringify(searchhistory));
         }
-
-        if (!searchhistory.includes(data.name)) searchhistory.push(data.name);
-        localStorage.setItem("searchhistory", JSON.stringify(searchhistory));
     }
 
     const setActiveItem = () => {
@@ -37,7 +41,7 @@ const Suggestion = ({ index, data, isActive, setReloadHistory, setClose, setSugI
     }
 
     const activeItem = (val = -1) => {
-        setSugIndex(val); 
+        setSugIndex(val);
         sugIndexValue = val;
         arrownavigation = false;
     }
@@ -60,7 +64,7 @@ const Suggestion = ({ index, data, isActive, setReloadHistory, setClose, setSugI
                     {data.price &&
                         <div className="stock-price">${data.price}</div>}
                     {!data.price &&
-                        <div className='remove-item' onClick={e => { e.preventDefault(); removeitem(); }}>
+                        <div className='remove-item'>
                             <i className="bi bi-x-lg"></i>
                         </div>
                     }
@@ -214,7 +218,7 @@ const Search = () => {
                 <div className="search-container" ref={wrapperRef}>
 
                     <input type="text" placeholder="Search for stock.." value={searchQuery} onChange={onQueryChange} onKeyDown={onKeyPressed}
-                        onFocus={() => { setShowSuggetions(true); }} ref={inputRef}
+                        onFocus={e => { e.target.select(); setShowSuggetions(true); }} ref={inputRef}
                         className={showSuggestions ? "searchinput active" : ""} />
 
                     {showSuggestions && <div className="search-suggestion">
@@ -234,7 +238,7 @@ const Search = () => {
 }
 
 const Login = ({ onLogout, isUserSignedIn, setIsUserSignedIn }) => {
-    const [profile, setProfile] = useState(window.PATH + "/images/profile-blank.png");
+    const [profile, setProfile] = useState();
     const [name, setName] = useState("");
     const [showMenu, setShowMenu] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -312,7 +316,7 @@ const Login = ({ onLogout, isUserSignedIn, setIsUserSignedIn }) => {
                 />}
             {isUserSignedIn && !loading &&
                 <>
-                    <img src={window.API_URL + "/public/profile/" + profile} onClick={openMenu} referrerPolicy="no-referrer" />
+                    {profile && <img src={window.API_URL + "/public/profile/" + profile} onClick={openMenu} referrerPolicy="no-referrer" />}
                     {showMenu &&
                         <div className="profile-menu">
                             <h2>Hello {name}</h2>

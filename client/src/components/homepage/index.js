@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { StockWidget } from '../stock/widget';
-import { fetchHome, fetchArticles, addsaved, fetchCategories } from '../../api';
+import { fetchHome, fetchArticles, fetchCategories, top3 } from '../../api';
 import Async from "react-async";
 import { Link } from "react-router-dom";
 import { Carousel } from "../../plugins/carousel";
@@ -12,9 +12,11 @@ const Article = ({ data }) => {
             <div className="article">
                 <div className='article-image'
                     style={{ backgroundImage: "url(" + data.image + ")" }}></div>
-                <h2>{data.title}</h2>
-                <span>Published at {data.date}</span>
-                <div><a href={data.link} target="_blank"><button>Continue Reading<i className="bi bi-box-arrow-up-right"></i></button></a></div>
+                <div className="article-content">
+                    <h2>{data.title}</h2>
+                    <span>Published at {data.date}</span>
+                    <div><a href={data.link} target="_blank"><button>Continue Reading<i className="bi bi-box-arrow-up-right"></i></button></a></div>
+                </div>
             </div>
         </div>
     );
@@ -28,11 +30,11 @@ const Slider = () => {
         (async () => {
             let d = await fetchHome();
             if (d.pass)
-            setHomeStocks(d.data);
+                setHomeStocks(d.data);
 
             d = await fetchCategories();
             if (d.pass)
-            setCategories(d.data);
+                setCategories(d.data);
         })();
     }, []);
 
@@ -52,7 +54,8 @@ const Slider = () => {
 
             {!homeStocks && <div className="loading-large"></div>}
             {homeStocks && <>
-                <div className="carousel" onMouseEnter={Carousel.pause} onMouseLeave={Carousel.play}>
+                <div className="carousel" onMouseEnter={Carousel.pause} 
+                     onMouseLeave={Carousel.play}>
                     <div className="control">
                         <div className='arrow-left' onClick={() => { Carousel.intervalfun(true); }}><i className="bi bi-chevron-left"></i></div>
                         <div className='progress-container'>
@@ -86,47 +89,46 @@ const Slider = () => {
     )
 }
 
+const TopBlock = ({ stock }) => {
+    return (
+        <div className="topblock col-lg-4">
+            <Link to={window.PATH + "/stock/" + stock.symbol} draggable="false">
+                <div className="main-top">
+                    <div className="successrate">
+                        {stock.prediction_accuracy}%
+                        <div>Success Rate</div>
+                    </div>
+                    <div className="topblock-img">
+                        <img src={window.PATH + "/images/stocks/" + stock.icon} />
+                    </div>
+                    <h2>{stock.name}</h2>
+                </div>
+            </Link>
+        </div>
+
+    )
+}
 
 const Top3 = () => {
+    const getTop = async () => {
+        const d = await top3();
+        if (!d.pass) throw new Error(d.msg);
+        return d.data;
+    }
 
     return (
-        <div className="row">
-            <div className="topblock col-lg-4">
-                <div className="main-top">
-                    <div className="successrate">
-                        96%
-                        <div>Success Rate</div>
-                    </div>
-                    <div className="topblock-img">
-                        <img src="http://localhost:3000/images/stocks/apple.png" />
-                    </div>
-                    <h2>Apple Inc.</h2>
-                </div>
-            </div>
-            <div className="topblock col-lg-4">
-                <div className="main-top">
-                    <div className="successrate">
-                        98%
-                        <div>Success Rate</div>
-                    </div>
-                    <div className="topblock-img">
-                        <img src="http://localhost:3000/images/stocks/meta.png" />
-                    </div>
-                    <h2>Meta</h2>
-                </div>
-            </div>
-            <div className="topblock col-lg-4">
-                <div className="main-top">
-                    <div className="successrate">
-                        92%
-                        <div>Success Rate</div>
-                    </div>
-                    <div className="topblock-img">
-                        <img src="http://localhost:3000/images/stocks/microsoft.png" />
-                    </div>
-                    <h2>Microsoft</h2>
-                </div>
-            </div>
+        <div className="row" style={{ marginTop: "50px" }}>
+            <Async promiseFn={getTop}>
+                {({ data, error, isPending }) => {
+                    if (isPending) return (<div className='loading-large' style={{ height: "400px" }}></div>);
+                    if (error) return (<div id="notice"><i className="bi bi-exclamation-circle"></i> Couldn't load news</div>);
+                    if (data) {
+                        return data.map(stock => (
+                            <TopBlock key={"topblock" + stock.id} stock={stock} />
+                        ));
+                    }
+                }}
+            </Async>
         </div>
     )
 }
@@ -143,7 +145,7 @@ function Homepage() {
         <>
             <Top3 />
             <Slider />
-            <h1>Recent News</h1>
+            <h1 id="newstitle">Recent News</h1>
             <div className="row articles">
                 <Async promiseFn={getArticles}>
                     {({ data, error, isPending }) => {

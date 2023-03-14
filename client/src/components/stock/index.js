@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams } from "react-router-dom";
-import { fetchBySymbol, fetchSuggestions, fetchGraph, addComment, fetchComments, deletecomment, removesaved, addsaved } from '../../api';
+import {
+    fetchBySymbol, fetchSuggestions, fetchGraph,
+    addComment, fetchComments, deletecomment,
+    removesaved, addsaved, feedback, addFeedback
+} from '../../api';
 import { graph, graphwidth } from '../../plugins/graph';
 import { Tooltip } from 'react-tooltip';
 import { StockWidget } from '../stock/widget';
 import Async from "react-async";
 import ReactTimeAgo from 'react-time-ago'
 import 'react-tooltip/dist/react-tooltip.css'
+import { Pie, PieRGB } from "../../plugins/pie";
 
 let graphdata = { data: [], pred: [], dates: [] };
 const Graph = ({ stockid }) => {
@@ -177,17 +182,17 @@ const StockElements = ({ data }) => {
                     </div>
                 </div>
                 <div className="stock-name">
-                <h1>{data.name + " (" + data.symbol + ")"}</h1>
+                    <h1>{data.name + " (" + data.symbol + ")"}</h1>
 
-                {data.saved !== undefined && !loading &&
-                    <div className="stock-box">
-                        <div className={'stock-saved' + (add ? ' active' : '')} onClick={e => menuOptionClick(e)}
-                            data-tooltip-html={!add ? "Add to saved" : "Remove from saved"} data-tooltip-id="tooltip">
-                            {!add ? <i className="bi bi-bookmark"></i> : <i className="bi bi-bookmark-fill"></i>}
+                    {data.saved !== undefined && !loading &&
+                        <div className="stock-box">
+                            <div className={'stock-saved' + (add ? ' active' : '')} onClick={e => menuOptionClick(e)}
+                                data-tooltip-html={!add ? "Add to saved" : "Remove from saved"} data-tooltip-id="tooltip">
+                                {!add ? <i className="bi bi-bookmark"></i> : <i className="bi bi-bookmark-fill"></i>}
+                            </div>
                         </div>
-                    </div>
-                }
-                {loading && <div className='loading'></div>}
+                    }
+                    {loading && <div className='loading'></div>}
                 </div>
 
                 <div className="stock-box">
@@ -280,7 +285,7 @@ const AddComment = ({ stockid, setReloadComments }) => {
         if (sendResult.pass) {
             setContent("");
             setReloadComments(val => val + 1);
-        }else{
+        } else {
             alert("Unexpected error, try again");
         }
         addLoading(false);
@@ -416,7 +421,7 @@ const Discussion = ({ stockid, isUserSignedIn }) => {
     }
 
     return (
-        <>
+        <div className='discussion-block'>
             <h1>Discussion ({commentCount})</h1>
             <div className="discussion-box">
                 {isUserSignedIn &&
@@ -434,7 +439,67 @@ const Discussion = ({ stockid, isUserSignedIn }) => {
                     }
                 </div>
             </div>
-        </>
+        </div>
+    )
+}
+
+const Feedback = ({ stockid,isUserSignedIn }) => {
+    const [pieData, setPieData] = useState(null);
+    const [reloadPie, setReloadPie] = useState(0);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        (async () => {
+            const d = await feedback(stockid);
+            if (!d.pass) return;
+
+            let data = {
+                positive: 0, total: 0,
+                voted: (d.data.length > 0 ? d.data[0].voted : 0)
+            }
+            for (let i = 0; i < d.data.length; i++) {
+                if (d.data[i].feedback)
+                    data.positive += d.data[i].count;
+                data.total += d.data[i].count;
+            }
+
+            data.percent = data.total ? (data.positive / data.total) * 100 : 0;
+
+            setPieData(data);
+            setLoading(false);
+        })();
+    }, [reloadPie]);
+
+    const feedbackClick = async (feedback) => {
+        setLoading(true);
+        const sendResult = await addFeedback(feedback, stockid);
+        if (sendResult.pass) {
+            setReloadPie(val => val + 1);
+        } else {
+            setLoading(false);
+            alert("Unexpected error, try again");
+        }
+    }
+
+    return (
+        <div className="feedback-block">
+            <h3>What Do You Think About This Stock?</h3>
+            {pieData &&
+                <>
+                    <Pie title={pieData.percent + "%"} text="Like"
+                        gradient={PieRGB.positiveGradient(pieData.percent / 100)} />
+
+                    {!pieData.voted && !loading && isUserSignedIn &&
+                    <div className="feedback-buttons">
+                        <i className="bi bi-arrow-down-circle" onClick={() => { feedbackClick(0) }}></i>
+                        <i className="bi bi-arrow-up-circle" onClick={() => { feedbackClick(1) }}></i>
+                    </div> }
+                    { loading && loadingText() }
+
+                    <span id="voted">{pieData.total} people voted</span>
+                </>}
+            {!pieData && <div className='loading-large' style={{ height: "200px" }}></div>}
+        </div>
     )
 }
 
@@ -476,7 +541,10 @@ function Stock(props) {
                         return (<>
                             <StockElements data={data} />
 
-                            <Discussion isUserSignedIn={isUserSignedIn} stockid={data.id} />
+                            <div className="stock-block">
+                                <Feedback isUserSignedIn={isUserSignedIn} stockid={data.id} />
+                                <Discussion isUserSignedIn={isUserSignedIn} stockid={data.id} />
+                            </div>
 
                             <h1 id="seealso">See Also</h1>
                             <Async promiseFn={getSuggestions}>

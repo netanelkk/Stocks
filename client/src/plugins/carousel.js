@@ -7,7 +7,7 @@ Carousel.init = () => {
     clearInterval(Carousel.interval);
     Carousel.frame = 1;
     document.querySelectorAll(".carousel-progress")[0].classList.add("startprogress");
-    Carousel.interval = setInterval(() => { Carousel.intervalfun(false,false,true) }, 3000);
+    Carousel.interval = setInterval(() => { Carousel.intervalfun(false, false, true) }, 3000);
 }
 
 Carousel.pause = () => {
@@ -17,14 +17,15 @@ Carousel.pause = () => {
 }
 
 Carousel.play = () => {
-    Carousel.interval = setInterval(() => { Carousel.intervalfun(false,false,true) }, 3000);
+    clearInterval(Carousel.interval);
+    Carousel.interval = setInterval(() => { Carousel.intervalfun(false, false, true) }, 3000);
     document.querySelectorAll(".carousel-progress")[0].classList.remove("pause");
     document.querySelectorAll(".carousel-progress")[0].classList.add("startprogress");
 }
 
 let preframe = 1;
 Carousel.intervalfun = (back = false, customframe = false, startprogress = false) => {
-    if(startprogress) {
+    if (startprogress) {
         document.querySelectorAll(".carousel-progress")[0].classList.remove("startprogress");
         let blank = document.querySelectorAll(".carousel-progress")[0].offsetHeight; // refresh animation
         document.querySelectorAll(".carousel-progress")[0].classList.add("startprogress");

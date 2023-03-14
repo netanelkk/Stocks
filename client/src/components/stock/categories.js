@@ -7,6 +7,7 @@ const Cat = ({ filtered, filter, cat }) => {
             key={"cat" + cat.id} onClick={() => { filter(cat.id) }}>
             <i className={"bi " + cat.icon}></i>
             {cat.name}
+            <b>{cat.count}</b>
         </span>
     )
 }
@@ -31,8 +32,8 @@ function Categories(props) {
             {categories &&
                 categories.map(cat => (
                     filtered ? 
-                        <Cat cat={cat} filter={filter} filtered={filtered} /> 
-                    : <Link to={window.PATH + "/stocks?cat=" + cat.id}><Cat cat={cat} filter={filter} filtered={filtered} /></Link>
+                        <Cat cat={cat} filter={filter} filtered={filtered} key={"cat" + cat.id} /> 
+                    : <Link to={window.PATH + "/stocks?cat=" + cat.id}  key={"catlink" + cat.id}><Cat cat={cat} filter={filter} filtered={filtered} /></Link>
                     )
                 )
             }

@@ -64,7 +64,7 @@ const StocksPage = (props) => {
     return (
         <>
             <div className="stocks-title">
-                <h2>{(query ? data.length + ' Results for "' + decodeURI(query) + '"' : "All Stocks (" + data.length + ")")}</h2>
+                <h2>{(query ? data.length + ' Results for "' + decodeURI(query) + '"' : "All Stocks   ·   " + data.length + "")}</h2>
                 <Navbar bg="light">
                     <Container>
                         <Navbar.Toggle aria-controls="basic-navbar-nav" />

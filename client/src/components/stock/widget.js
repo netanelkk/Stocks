@@ -25,7 +25,7 @@ export default function StockWidget(props) {
     return (
         <div className={"stock-widget" + (isColumn ? "" : " col-lg-3")} id={!isNaN(i) ? "drag" + i : ""}>
             <Link to={window.PATH + "/stock/" + stock.symbol} draggable="false">
-                <div className={"stock" + (i === 0 && isColumn ? " top-stock" : "")} draggable="true" id={"widget" + i}
+                <div className={"stock" + (i === 0 && isColumn ? " top-stock" : "")} draggable="true" id={!isNaN(i) ? "widget" + i : ""}
                     onDragStart={() => { if (Sort) { Sort.dragstart(i) } }}
                     onDragEnter={() => { if (Sort) { Sort.dragenter() } }}
                     onDragOver={e => ((Sort && Sort.dragover(e, i)))}

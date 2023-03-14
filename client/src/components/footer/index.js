@@ -12,31 +12,31 @@ function Footer() {
                         <ul>
                             <Link to={window.PATH + "/"}>
                                 <li>
-                                    <i className="bi bi-house"></i> 
+                                    <i className="bi bi-house"></i>
                                     Home
                                 </li>
                             </Link>
                             <Link to={window.PATH + "/stocks"}>
                                 <li>
-                                <i className="bi bi-list-ul"></i>
+                                    <i className="bi bi-list-ul"></i>
                                     All Stocks
                                 </li>
                             </Link>
                             <Link to={window.PATH + "/top"}>
                                 <li>
-                                <i className="bi bi-gem"></i>
+                                    <i className="bi bi-gem"></i>
                                     Top
                                 </li>
                             </Link>
                             <Link to={window.PATH + "/saved"}>
                                 <li>
-                                <i className="bi bi-bookmark"></i>
+                                    <i className="bi bi-bookmark"></i>
                                     Saved
                                 </li>
                             </Link>
                             <Link to={window.PATH + "/analyse"}>
                                 <li>
-                                <i className="bi bi-clipboard-data"></i>
+                                    <i className="bi bi-clipboard-data"></i>
                                     Analyse
                                 </li>
                             </Link>
@@ -74,13 +74,16 @@ function Footer() {
                     <h3>Created By</h3>
                     <div className="credits">
                         <div className='credit'>
-                            Netanel Kluzner
+                            <img src={window.PATH + "/images/credits/nati.jpg"} />
+                            <a href="https://www.linkedin.com/in/netanelk/" target="_blank">Netanel Kluzner</a>
                         </div>
                         <div className='credit'>
-                            Guy Gavriel Halag
+                            <img src={window.PATH + "/images/credits/guy.jpg"} />
+                            <a href="https://www.linkedin.com/in/guy-gavriel-halag" target="_blank">Guy Gavriel Halag</a>
                         </div>
                         <div className='credit'>
-                            Adir Damari
+                            <img src={window.PATH + "/images/credits/adir.png"} />
+                            <a href="#" target="_blank">Adir Damari</a>
                         </div>
                     </div>
                     <span>&#169; 2023 All Right Reserved</span>

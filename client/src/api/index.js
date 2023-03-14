@@ -112,3 +112,14 @@ export async function deleteaccount() {
   return await request(API_URL + "/user/deleteaccount/", "", "DELETE");
 }
 
+export async function top3() {
+  return await request(API_URL + "/stock/top3", "", "GET");
+}
+
+export async function feedback(stockid) {
+  return await request(API_URL + "/stock/"+stockid+"/feedback", "", "GET");
+}
+
+export async function addFeedback(feedback, stockId) {
+  return await request(API_URL + "/stock/addfeedback/"+stockId, { feedback });
+}
